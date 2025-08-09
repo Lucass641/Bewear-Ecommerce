@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-import Cart from "./cart";
+import { Cart } from "./cart";
 
 export const Header = () => {
   const { data: session } = authClient.useSession();
@@ -26,7 +26,7 @@ export const Header = () => {
 
       <div className="flex items-center gap-2">
         <Cart />
-        <div className="border-l border-gray-200 h-5"></div>
+        <div className="h-5 border-l border-gray-200"></div>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
