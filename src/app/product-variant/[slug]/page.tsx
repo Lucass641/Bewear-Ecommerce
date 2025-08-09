@@ -48,7 +48,7 @@ const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
           sizes="100vw"
           width={0}
           height={0}
-          className="object h-auto w-full rounded-4xl bg-cover p-3"
+          className="object h-auto w-full rounded-4xl bg-cover p-4"
         />
         <div className="px-5">
           <VariantSelector
