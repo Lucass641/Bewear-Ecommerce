@@ -24,6 +24,14 @@ export const userTable = pgTable("user", {
     .notNull(),
 });
 
+export const userRelations = relations(userTable, ({ many, one }) => ({
+  shippingAddresses: many(shippingAddressTable),
+  cart: one(cartTable, {
+    fields: [userTable.id],
+    references: [cartTable.userId],
+  }),
+}));
+
 export const sessionTable = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -56,12 +64,16 @@ export const accountTable = pgTable("account", {
 });
 
 export const verificationTable = pgTable("verification", {
-  id: text('id').primaryKey(),
-  identifier: text('identifier').notNull(),
-value: text('value').notNull(),
-expiresAt: timestamp('expires_at').notNull(),
-createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
-updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
 });
 
 export const categoryTable = pgTable("category", {
@@ -79,7 +91,7 @@ export const productTable = pgTable("product", {
   id: uuid().primaryKey().defaultRandom(),
   categoryId: uuid("category_id")
     .notNull()
-    .references(() => categoryTable.id, {onDelete: 'set null'}),
+    .references(() => categoryTable.id, { onDelete: "set null" }),
   name: text().notNull(),
   slug: text().notNull().unique(),
   description: text().notNull(),
@@ -98,7 +110,7 @@ export const productVariantTable = pgTable("product_variant", {
   id: uuid().primaryKey().defaultRandom(),
   productId: uuid("product_id")
     .notNull()
-    .references(() => productTable.id, {onDelete: 'cascade'}),
+    .references(() => productTable.id, { onDelete: "cascade" }),
   name: text().notNull(),
   slug: text().notNull().unique(),
   color: text().notNull(),
@@ -113,6 +125,40 @@ export const productVariantRelations = relations(
     product: one(productTable, {
       fields: [productVariantTable.productId],
       references: [productTable.id],
+    }),
+  }),
+);
+
+export const shippingAddressTable = pgTable("shipping_address", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => userTable.id, { onDelete: "cascade" }),
+  recipientName: text().notNull(),
+  street: text().notNull(),
+  number: text().notNull(),
+  complement: text(),
+  city: text().notNull(),
+  state: text().notNull(),
+  neighborhood: text().notNull(),
+  zipCode: text().notNull(),
+  country: text().notNull(),
+  phone: text().notNull(),
+  email: text().notNull(),
+  cpfOrCnpj: text().notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const shippingAddressRelations = relations(
+  shippingAddressTable,
+  ({ one }) => ({
+    user: one(userTable, {
+      fields: [shippingAddressTable.userId],
+      references: [userTable.id],
+    }),
+    cart: one(cartTable, {
+      fields: [shippingAddressTable.id],
+      references: [cartTable.shippingAddressId],
     }),
   }),
 );
