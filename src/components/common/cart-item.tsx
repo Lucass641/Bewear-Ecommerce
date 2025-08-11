@@ -1,6 +1,9 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
 
+import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
 
 import { Button } from "../ui/button";
@@ -22,6 +25,24 @@ const CartItem = ({
   productVariantPriceInCents,
   quantity,
 }: CartItemProps) => {
+  const queryClient = useQueryClient();
+  const removeProductFromCartMutation = useMutation({
+    mutationKey: ["remove-cart-product"],
+    mutationFn: () => removeProductFromCart({ CartItemId: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+  const handleDeleteClick = () => {
+    removeProductFromCartMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Produto removido da sacola.");
+      },
+      onError: () => {
+        toast.error("Erro ao remover produto da sacola.");
+      },
+    });
+  };
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -34,11 +55,9 @@ const CartItem = ({
         />
         <div className="flex flex-col gap-1">
           <p className="text-m font-semibold">{productName}</p>
-          <p className="text-sm text-muted-foreground">
-            {productVariantName}
-          </p>
+          <p className="text-muted-foreground text-sm">{productVariantName}</p>
           <div className="flex w-[100px] items-center justify-between rounded-lg border p-1">
-            <Button className="h-4 w-4" variant="ghost" onClick={() => {}}>
+            <Button className="h-4 w-4" variant="ghost" onClick={handleDeleteClick}>
               <Trash2 className="size-3" />
             </Button>
             <p className="text-xs font-medium">{quantity}</p>
