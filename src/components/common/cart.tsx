@@ -44,6 +44,7 @@ export const Cart = () => {
                   <CartItem
                     key={item.id}
                     id={item.id}
+                    productVariantId={item.productVariant.id}
                     productName={item.productVariant.product.name}
                     productVariantName={item.productVariant.name}
                     productVariantImageUrl={item.productVariant.imageUrl}
@@ -68,12 +69,12 @@ export const Cart = () => {
                 <p>Entrega</p>
                 <p>GRÁTIS</p>
               </div>
-              <Separator/>
+              <Separator />
               <div className="flex items-center justify-between text-xs font-medium">
                 <p>Total</p>
                 <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
               </div>
-              <Button className="rounded-full mt-5">Finalizar compra</Button>
+              <Button className="mt-5 rounded-full">Finalizar compra</Button>
             </div>
           )}
         </div>
