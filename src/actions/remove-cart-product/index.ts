@@ -21,7 +21,7 @@ export const removeProductFromCart = async (
     throw new Error("Unauthorized");
   }
   const cartItem = await db.query.cartItemTable.findFirst({
-    where: (cartItem, { eq }) => eq(cartItem.id, data.CartItemId),
+    where: (cartItem, { eq }) => eq(cartItem.id, data.cartItemId),
     with: {
       cart: true,
     },
