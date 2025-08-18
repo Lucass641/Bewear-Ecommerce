@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido."),
@@ -38,6 +40,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 const Addresses = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const { mutateAsync: createAddress, isPending } = useCreateShippingAddress();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -56,8 +59,14 @@ const Addresses = () => {
     },
   });
 
-  function onSubmit(values: FormValues) {
-    console.log(values);
+  async function onSubmit(values: FormValues) {
+    try {
+      await createAddress(values);
+      form.reset();
+      toast.success("Endereço criado com sucesso.");
+    } catch {
+      toast.error("Erro ao criar endereço.");
+    }
   }
   return (
     <Card>
@@ -251,7 +260,10 @@ const Addresses = () => {
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <FormControl>
-                          <Input placeholder="UF" maxLength={2} {...field} />
+                          <Input
+                            placeholder="Digite o estado"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -259,7 +271,11 @@ const Addresses = () => {
                   />
                 </div>
 
-                <Button type="submit" className="mt-2 w-full md:w-auto">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="mt-2 w-full md:w-auto"
+                >
                   Continuar
                 </Button>
               </form>
