@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
+import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido."),
@@ -41,6 +42,7 @@ type FormValues = z.infer<typeof formSchema>;
 const Addresses = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const { mutateAsync: createAddress, isPending } = useCreateShippingAddress();
+  const { data: addresses } = useUserAddresses();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -75,9 +77,32 @@ const Addresses = () => {
       </CardHeader>
       <CardContent>
         <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
+          {addresses?.map((address) => (
+            <Card key={address.id} className="mb-2">
+              <CardContent>
+                <div className="flex items-center space-x-2 py-3">
+                  <RadioGroupItem value={address.id} id={address.id} />
+                  <Label htmlFor={address.id} className="cursor-pointer">
+                    <div>
+                      <p className="text-sm">
+                        <p>{address.recipientName}</p>
+                        {address.street}, {address.number}
+                        {address.complement && `, ${address.complement}`}
+                        <p>
+                          {address.neighborhood}, {address.city},{" "}
+                          {address.state}
+                        </p>
+                        <p>{address.zipCode}</p>
+                      </p>
+                    </div>
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
           <Card>
             <CardContent>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 py-3">
                 <RadioGroupItem value="add_new" id="add_new" />
                 <Label htmlFor="add_new">Adicionar novo endereço</Label>
               </div>
@@ -260,10 +285,7 @@ const Addresses = () => {
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Digite o estado"
-                            {...field}
-                          />
+                          <Input placeholder="Digite o estado" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
