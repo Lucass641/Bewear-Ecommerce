@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
 
@@ -39,10 +40,16 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const Addresses = () => {
+interface AddressesProp {
+  shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
+}
+
+const Addresses = ({ shippingAddresses }: AddressesProp) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const { mutateAsync: createAddress, isPending } = useCreateShippingAddress();
-  const { data: addresses } = useUserAddresses();
+  const { data: addresses } = useUserAddresses({
+    initialData: shippingAddresses,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -78,14 +85,16 @@ const Addresses = () => {
       <CardContent>
         <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
           {addresses?.map((address) => (
-            <Card key={address.id} className="mb-2">
+            <Card key={address.id}>
               <CardContent>
-                <div className="flex items-center space-x-2 py-3">
+                <div className="flex items-center space-x-2">
                   <RadioGroupItem value={address.id} id={address.id} />
                   <Label htmlFor={address.id} className="cursor-pointer">
                     <div>
                       <p className="text-sm">
-                        <p>{address.recipientName}</p>
+                        <p className="text-lg font-semibold">
+                          {address.recipientName}
+                        </p>
                         {address.street}, {address.number}
                         {address.complement && `, ${address.complement}`}
                         <p>
@@ -102,7 +111,7 @@ const Addresses = () => {
           ))}
           <Card>
             <CardContent>
-              <div className="flex items-center space-x-2 py-3">
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="add_new" id="add_new" />
                 <Label htmlFor="add_new">Adicionar novo endereço</Label>
               </div>
