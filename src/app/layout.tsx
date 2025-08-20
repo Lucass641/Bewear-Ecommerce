@@ -33,7 +33,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ReactQueryProvider>{children}</ReactQueryProvider>
-        <Toaster />
+        <Toaster  position="top-center"/>
       </body>
     </html>
   );

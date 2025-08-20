@@ -155,7 +155,7 @@ const Addresses = ({
             <Button
               variant={selectedAddress === "add_new" ? "default" : "outline"}
               type="button"
-              className="w-full"
+              className="w-full rounded-full"
               onClick={() => setSelectedAddress("add_new")}
             >
               <div className="flex items-center">
@@ -169,7 +169,7 @@ const Addresses = ({
           <div className="mt-4">
             <Button
               onClick={handleGoToPayment}
-              className="w-full"
+              className="w-full rounded-full"
               disabled={updateCartShippingAddressMutation.isPending}
             >
               {updateCartShippingAddressMutation.isPending

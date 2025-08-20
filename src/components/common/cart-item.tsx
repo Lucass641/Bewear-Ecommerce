@@ -67,7 +67,7 @@ const CartItem = ({
           className="rounded-lg"
         />
         <div className="flex flex-col gap-1">
-          <p className="text-m font-semibold">{productName}</p>
+          <p className="text-sm font-semibold">{productName}</p>
           <p className="text-muted-foreground text-sm">{productVariantName}</p>
           <div className="flex w-[100px] items-center justify-between rounded-lg border p-1">
             <Button
