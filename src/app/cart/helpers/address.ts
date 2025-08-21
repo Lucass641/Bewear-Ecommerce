@@ -11,9 +11,6 @@ export const formatAddress = (address: {
   return [
     address.recipientName,
     `${address.street}, ${address.number}${address.complement ? `, ${address.complement}` : ""}`,
-    `${address.neighborhood}, ${address.city}, ${address.state}`,
-    address.zipCode,
-  ]
-    .filter(Boolean)
-    .join(" • ");
+    `${address.neighborhood}, ${address.city}, ${address.state}, ${address.zipCode}`,
+  ].join("\n");
 };

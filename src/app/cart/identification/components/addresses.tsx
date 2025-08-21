@@ -143,7 +143,9 @@ const Addresses = ({
                     <div className="flex-1">
                       <Label htmlFor={address.id} className="cursor-pointer">
                         <div>
-                          <p className="text-sm">{formatAddress(address)}</p>
+                          <p className="text-sm whitespace-pre-line">
+                            {formatAddress(address)}
+                          </p>
                         </div>
                       </Label>
                     </div>
