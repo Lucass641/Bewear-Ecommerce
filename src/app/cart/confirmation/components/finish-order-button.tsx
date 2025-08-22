@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -17,7 +18,9 @@ import { useFinishOrder } from "@/hooks/mutations/use-finish-order";
 
 const FinishOrderButton = () => {
   const [successDialogIsOpen, setSuccessDialogIsOpen] = useState(false);
-  const finishOrderMutation = useFinishOrder();
+  const searchParams = useSearchParams();
+  const checkoutSessionId = searchParams.get("checkoutSessionId") || undefined;
+  const finishOrderMutation = useFinishOrder({ checkoutSessionId });
   const handleFinishOrder = () => {
     finishOrderMutation.mutate();
     setSuccessDialogIsOpen(true);

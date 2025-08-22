@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { formatCentsToBRL } from "@/helpers/money";
 import { useCart } from "@/hooks/queries/use-cart";
+import { authClient } from "@/lib/auth-client";
 
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
@@ -18,7 +19,10 @@ import {
 import CartItem from "./cart-item";
 
 export const Cart = () => {
-  const { data: cart } = useCart();
+  const { data: session } = authClient.useSession();
+  const { data: cart } = useCart({
+    enabled: !!session?.user,
+  });
   return (
     <Sheet>
       <SheetTrigger asChild>

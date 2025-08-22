@@ -1,10 +1,10 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import React from "react";
 
-import { addProductToCart } from "@/actions/add-cart-product";
 import { Button } from "@/components/ui/button";
+import { useCreateCheckoutSession } from "@/hooks/mutations/use-create-checkout-session";
 
 interface BuyButtonProps {
   productVariantId: string;
@@ -12,28 +12,26 @@ interface BuyButtonProps {
 }
 
 const BuyButton = ({ productVariantId, quantity }: BuyButtonProps) => {
-  const queryClient = useQueryClient();
   const router = useRouter();
 
-  const { mutate, isPending } = useMutation({
-    mutationKey: ["buyNow", productVariantId, quantity],
-    mutationFn: async () =>
-      addProductToCart({
-        productVariantId,
-        quantity,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      router.push("/cart/identification");
-    },
+  const createSessionMutation = useCreateCheckoutSession({
+    productVariantId,
+    quantity,
   });
 
   return (
     <Button
       className="rounded-full"
       size="lg"
-      disabled={isPending}
-      onClick={() => mutate()}
+      disabled={createSessionMutation.isPending}
+      onClick={() =>
+        createSessionMutation.mutate(undefined, {
+          onSuccess: (session) => {
+            const qs = session?.id ? `?checkoutSessionId=${session.id}` : "";
+            router.push(`/cart/identification${qs}`);
+          },
+        })
+      }
     >
       Comprar agora
     </Button>

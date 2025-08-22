@@ -6,12 +6,15 @@ import { Header } from "@/components/common/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
+import { getCheckoutSession } from "@/actions/create-checkout-session";
 
 import CartSummary from "../components/cart-summary";
 import { formatAddress } from "../helpers/address";
 import FinishOrderButton from "./components/finish-order-button";
 
-const ConfirmationPage = async () => {
+const ConfirmationPage = async (props: {
+  searchParams?: { checkoutSessionId?: string };
+}) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -19,6 +22,7 @@ const ConfirmationPage = async () => {
   if (!session?.user.id) {
     redirect("/");
   }
+  const hasCheckoutSession = !!props.searchParams?.checkoutSessionId;
   const cart = await db.query.cartTable.findFirst({
     where: (cart, { eq }) => eq(cart.userId, session.user.id),
     with: {
@@ -34,15 +38,46 @@ const ConfirmationPage = async () => {
       },
     },
   });
-  if (!cart || cart?.items.length == 0) {
+  const checkoutSession = props.searchParams?.checkoutSessionId
+    ? await getCheckoutSession(props.searchParams.checkoutSessionId)
+    : null;
+  if (!hasCheckoutSession && (!cart || cart?.items.length == 0)) {
     redirect("/");
   }
-  const cartTotalInCents = cart.items.reduce(
+  const checkoutVariant = checkoutSession
+    ? await db.query.productVariantTable.findFirst({
+        where: (pv, { eq }) => eq(pv.id, checkoutSession.productVariantId),
+        with: { product: true },
+      })
+    : null;
+  const items =
+    checkoutSession && checkoutVariant
+      ? [
+          {
+            productVariant: checkoutVariant,
+            quantity: checkoutSession.quantity,
+          },
+        ]
+      : cart?.items || [];
+  const cartTotalInCents = items.reduce(
     (acc, item) => acc + item.productVariant.priceInCents * item.quantity,
     0,
   );
-  if (!cart.shippingAddress) {
-    redirect("/cart/identification");
+  const shippingAddress = checkoutSession?.shippingAddressId
+    ? await db.query.shippingAddressTable.findFirst({
+        where: (sa, { eq, and }) =>
+          and(
+            eq(sa.id, checkoutSession.shippingAddressId!),
+            eq(sa.userId, session.user.id),
+          ),
+      })
+    : cart?.shippingAddress;
+  if (!shippingAddress) {
+    redirect(
+      hasCheckoutSession
+        ? `/cart/identification?checkoutSessionId=${props.searchParams?.checkoutSessionId}`
+        : "/cart/identification",
+    );
   }
 
   return (
@@ -58,7 +93,7 @@ const ConfirmationPage = async () => {
             <Card>
               <CardContent>
                 <p className="text-sm whitespace-pre-line">
-                  {formatAddress(cart.shippingAddress)}
+                  {formatAddress(shippingAddress)}
                 </p>
               </CardContent>
             </Card>
@@ -68,7 +103,7 @@ const ConfirmationPage = async () => {
         <CartSummary
           subtotalInCents={cartTotalInCents}
           totalInCents={cartTotalInCents}
-          products={cart.items.map((item) => ({
+          products={items.map((item) => ({
             id: item.productVariant.id,
             name: item.productVariant.product.name,
             variantName: item.productVariant.name,

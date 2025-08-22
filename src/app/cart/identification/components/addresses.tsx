@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
+import { useUpdateCheckoutSessionAddress } from "@/hooks/mutations/use-update-checkout-session-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
 
 import { formatAddress } from "../../helpers/address";
@@ -54,11 +55,16 @@ const Addresses = ({
   defaultShippingAddressId,
 }: AddressesProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const checkoutSessionId = searchParams.get("checkoutSessionId");
   const [selectedAddress, setSelectedAddress] = useState<string | null>(
     defaultShippingAddressId || null,
   );
   const createShippingAddressMutation = useCreateShippingAddress();
   const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
+  const updateCheckoutSessionAddressMutation = checkoutSessionId
+    ? useUpdateCheckoutSessionAddress({ checkoutSessionId })
+    : null;
   const { data: addresses, isLoading } = useUserAddresses({
     initialData: shippingAddresses,
   });
@@ -102,6 +108,13 @@ const Addresses = ({
     if (!selectedAddress || selectedAddress === "add_new") return;
 
     try {
+      if (checkoutSessionId && updateCheckoutSessionAddressMutation) {
+        await updateCheckoutSessionAddressMutation.mutateAsync(selectedAddress);
+        router.push(
+          `/cart/confirmation?checkoutSessionId=${checkoutSessionId}`,
+        );
+        return;
+      }
       await updateCartShippingAddressMutation.mutateAsync({
         shippingAddressId: selectedAddress,
       });
