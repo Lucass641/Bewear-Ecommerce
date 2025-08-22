@@ -30,7 +30,7 @@ export const Header = () => {
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
-              <MenuIcon />
+              <MenuIcon className="size-6" />
             </Button>
           </SheetTrigger>
           <SheetContent>
@@ -60,10 +60,12 @@ export const Header = () => {
                       </div>
                     </div>
                     <Button
+                      className="rounded-full"
                       variant="outline"
-                      size="icon"
+                      size="lg"
                       onClick={() => authClient.signOut()}
                     >
+                      Logout
                       <LogOutIcon />
                     </Button>
                   </div>
@@ -71,8 +73,9 @@ export const Header = () => {
               ) : (
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold">Olá, Faça seu login!</h2>
-                  <Button size="icon" asChild variant="outline">
+                  <Button size="lg" asChild className="rounded-full">
                     <Link href="/authentication">
+                      Login
                       <LogInIcon />
                     </Link>
                   </Button>
