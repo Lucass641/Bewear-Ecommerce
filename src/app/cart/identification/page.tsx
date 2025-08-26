@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 
 import { getNewCart } from "@/actions/create-new-cart";
-import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import { db } from "@/db";
 import { shippingAddressTable } from "@/db/schema";
@@ -93,9 +92,6 @@ const IdentificationPage = async (props: {
             imageUrl: item.productVariant.imageUrl,
           }))}
         />
-      </div>
-      <div className="mt-12">
-        <Footer />
       </div>
     </>
   );

@@ -47,6 +47,7 @@ const CheckoutSuccessPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Footer />
     </>
   );
 };

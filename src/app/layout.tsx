@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import Footer from "@/components/common/footer";
 import { Toaster } from "@/components/ui/sonner";
 import ReactQueryProvider from "@/providers/react-query";
 
@@ -27,13 +28,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
         suppressHydrationWarning
       >
-        <ReactQueryProvider>{children}</ReactQueryProvider>
-        <Toaster  position="top-center"/>
+        <div className="flex-1">
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </div>
+        <Toaster position="top-center" />
+        <Footer />
       </body>
     </html>
   );
