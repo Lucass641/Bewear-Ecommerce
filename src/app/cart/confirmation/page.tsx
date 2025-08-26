@@ -1,12 +1,12 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getNewCart } from "@/actions/create-new-cart";
 import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
-import { getCheckoutSession } from "@/actions/create-checkout-session";
 
 import CartSummary from "../components/cart-summary";
 import { formatAddress } from "../helpers/address";
@@ -39,7 +39,7 @@ const ConfirmationPage = async (props: {
     },
   });
   const checkoutSession = props.searchParams?.checkoutSessionId
-    ? await getCheckoutSession(props.searchParams.checkoutSessionId)
+    ? await getNewCart(props.searchParams.checkoutSessionId)
     : null;
   if (!hasCheckoutSession && (!cart || cart?.items.length == 0)) {
     redirect("/");

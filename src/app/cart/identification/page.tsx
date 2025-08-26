@@ -3,12 +3,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 
+import { getNewCart } from "@/actions/create-new-cart";
 import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import { db } from "@/db";
-import { productVariantTable, shippingAddressTable } from "@/db/schema";
+import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { getCheckoutSession } from "@/actions/create-checkout-session";
 
 import CartSummary from "../components/cart-summary";
 import Addresses from "./components/addresses";
@@ -40,7 +40,7 @@ const IdentificationPage = async (props: {
     },
   });
   const checkoutSession = props.searchParams?.checkoutSessionId
-    ? await getCheckoutSession(props.searchParams.checkoutSessionId)
+    ? await getNewCart(props.searchParams.checkoutSessionId)
     : null;
   if (!hasCheckoutSession && (!cart || cart?.items.length == 0)) {
     redirect("/");

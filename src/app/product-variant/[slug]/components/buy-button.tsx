@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { useCreateCheckoutSession } from "@/hooks/mutations/use-create-checkout-session";
+import { useCreateNewCart } from "@/hooks/mutations/use-create-new-cart";
 
 interface BuyButtonProps {
   productVariantId: string;
@@ -14,7 +14,7 @@ interface BuyButtonProps {
 const BuyButton = ({ productVariantId, quantity }: BuyButtonProps) => {
   const router = useRouter();
 
-  const createSessionMutation = useCreateCheckoutSession({
+  const createSessionMutation = useCreateNewCart({
     productVariantId,
     quantity,
   });

@@ -6,16 +6,10 @@ export const getUseCartQueryKey = () => ["cart"] as const;
 
 export const useCart = (params?: {
   initialData?: Awaited<ReturnType<typeof getCart>>;
-  enabled?: boolean;
 }) => {
   return useQuery({
     queryKey: getUseCartQueryKey(),
     queryFn: () => getCart(),
     initialData: params?.initialData,
-    enabled: params?.enabled ?? true,
-    retry: 1,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 };

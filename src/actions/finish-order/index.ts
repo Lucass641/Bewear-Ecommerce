@@ -1,22 +1,17 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
+import { clearNewCart, getNewCart } from "@/actions/create-new-cart";
 import { db } from "@/db";
 import {
   cartItemTable,
   cartTable,
   orderItemTable,
   orderTable,
-  productVariantTable,
-  shippingAddressTable,
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import {
-  getCheckoutSession,
-  clearCheckoutSession,
-} from "@/actions/create-checkout-session";
 
 export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
   const session = await auth.api.getSession({
@@ -28,7 +23,7 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
 
   const hasCheckoutSession = !!params?.checkoutSessionId;
   const checkoutSession = params?.checkoutSessionId
-    ? await getCheckoutSession(params.checkoutSessionId)
+    ? await getNewCart(params.checkoutSessionId)
     : null;
   const cart = await db.query.cartTable.findFirst({
     where: eq(cartTable.userId, session.user.id),
@@ -69,7 +64,12 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
     (acc, item) => acc + item.productVariant!.priceInCents * item.quantity,
     0,
   );
+
+  let orderId: string | undefined;
   await db.transaction(async (tx) => {
+    if (!shippingAddress) {
+      throw new Error("Shipping address not found");
+    }
     const [order] = await tx
       .insert(orderTable)
       .values({
@@ -93,6 +93,7 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
     if (!order) {
       throw new Error("Failed to create order");
     }
+    orderId = order.id;
     const orderItemsPayload: Array<typeof orderItemTable.$inferInsert> =
       items.map((item) => ({
         orderId: order.id,
@@ -107,6 +108,10 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
     }
   });
   if (hasCheckoutSession && params?.checkoutSessionId) {
-    await clearCheckoutSession(params.checkoutSessionId);
+    await clearNewCart(params.checkoutSessionId);
   }
+  if (!orderId) {
+    throw new Error("Failed to create order");
+  }
+  return { orderId };
 };

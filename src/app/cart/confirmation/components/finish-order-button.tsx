@@ -1,11 +1,13 @@
 "use client";
 
+import { loadStripe } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,8 +23,23 @@ const FinishOrderButton = () => {
   const searchParams = useSearchParams();
   const checkoutSessionId = searchParams.get("checkoutSessionId") || undefined;
   const finishOrderMutation = useFinishOrder({ checkoutSessionId });
-  const handleFinishOrder = () => {
-    finishOrderMutation.mutate();
+  const handleFinishOrder = async () => {
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+      throw new Error("Stripe publishable key is not set");
+    }
+    const { orderId } = await finishOrderMutation.mutateAsync();
+    const checkoutSession = await createCheckoutSession({
+      orderId,
+    });
+    const stripe = await loadStripe(
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    );
+    if (!stripe) {
+      throw new Error("Failed to load Stripe");
+    }
+    await stripe.redirectToCheckout({
+      sessionId: checkoutSession.id,
+    });
     setSuccessDialogIsOpen(true);
   };
   return (

@@ -1,23 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { updateCheckoutSessionAddress } from "@/actions/create-checkout-session";
+import { updateNewCartAddress } from "@/actions/create-new-cart";
 
-export const getUseUpdateCheckoutSessionAddressMutationKey = (
+export const getUseUpdateNewCartAddressMutationKey = (
   checkoutSessionId: string,
-) => ["update-checkout-session-address", checkoutSessionId] as const;
+) => ["update-new-cart-address", checkoutSessionId] as const;
 
-export const useUpdateCheckoutSessionAddress = (params: {
+export const useUpdateNewCartAddress = (params: {
   checkoutSessionId: string;
 }) => {
   return useMutation({
-    mutationKey: getUseUpdateCheckoutSessionAddressMutationKey(
+    mutationKey: getUseUpdateNewCartAddressMutationKey(
       params.checkoutSessionId,
     ),
     mutationFn: async (shippingAddressId: string) => {
-      return updateCheckoutSessionAddress(
-        params.checkoutSessionId,
-        shippingAddressId,
-      );
+      return updateNewCartAddress(params.checkoutSessionId, shippingAddressId);
     },
   });
 };

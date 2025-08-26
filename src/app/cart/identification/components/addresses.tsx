@@ -24,7 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
-import { useUpdateCheckoutSessionAddress } from "@/hooks/mutations/use-update-checkout-session-address";
+import { useUpdateNewCartAddress } from "@/hooks/mutations/use-update-checkout-session-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
 
 import { formatAddress } from "../../helpers/address";
@@ -62,9 +62,9 @@ const Addresses = ({
   );
   const createShippingAddressMutation = useCreateShippingAddress();
   const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
-  const updateCheckoutSessionAddressMutation = checkoutSessionId
-    ? useUpdateCheckoutSessionAddress({ checkoutSessionId })
-    : null;
+  const updateNewCartAddressMutation = useUpdateNewCartAddress({
+    checkoutSessionId: checkoutSessionId || "",
+  });
   const { data: addresses, isLoading } = useUserAddresses({
     initialData: shippingAddresses,
   });
@@ -108,8 +108,8 @@ const Addresses = ({
     if (!selectedAddress || selectedAddress === "add_new") return;
 
     try {
-      if (checkoutSessionId && updateCheckoutSessionAddressMutation) {
-        await updateCheckoutSessionAddressMutation.mutateAsync(selectedAddress);
+      if (checkoutSessionId) {
+        await updateNewCartAddressMutation.mutateAsync(selectedAddress);
         router.push(
           `/cart/confirmation?checkoutSessionId=${checkoutSessionId}`,
         );

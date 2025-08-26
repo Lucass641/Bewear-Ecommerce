@@ -2,7 +2,6 @@ import { desc } from "drizzle-orm";
 import Image from "next/image";
 
 import CategorySelector from "@/components/common/category-selector";
-import EphemeralCartCleanup from "@/components/common/ephemeral-cart-cleanup";
 import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import ProductList from "@/components/common/product-list";
@@ -26,7 +25,6 @@ const Home = async () => {
 
   return (
     <>
-      <EphemeralCartCleanup />
       <Header />
       <div className="space-y-6">
         <div className="px-5">

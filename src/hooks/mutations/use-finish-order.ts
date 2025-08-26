@@ -11,7 +11,7 @@ export const useFinishOrder = (params?: { checkoutSessionId?: string }) => {
   return useMutation({
     mutationKey: getUseFinishOrderMutationKey(),
     mutationFn: async () => {
-      await finishOrder({ checkoutSessionId: params?.checkoutSessionId });
+      return await finishOrder({ checkoutSessionId: params?.checkoutSessionId });
     },
     onSuccess: () => {
       try {
