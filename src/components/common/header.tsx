@@ -27,7 +27,7 @@ import { Cart } from "./cart";
 export const Header = () => {
   const { data: session } = authClient.useSession();
   return (
-    <header className="flex items-center justify-between p-5">
+    <header className="mb-10 flex items-center justify-between p-5">
       <Link href="/">
         <Image src="/logo.svg" alt="BEWEAR" width={100} height={26.14} />
       </Link>
@@ -84,13 +84,10 @@ export const Header = () => {
               </div>
 
               {/* Menu Navigation */}
-              <div className="space-y-4">
-                <div className="space-y-2 px-5">
-                  <Link
-                    href="/"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <HomeIcon className="h-5 w-5" />
+              <div className="space-y-6">
+                <div className="space-y-6 px-5">
+                  <Link href="/" className="flex items-center gap-3 rounded-lg">
+                    <HomeIcon size={16} />
                     <p className="font-semibold">Início</p>
                   </Link>
 
@@ -98,17 +95,17 @@ export const Header = () => {
                     <>
                       <Link
                         href="/my-orders"
-                        className="flex items-center gap-3 rounded-lg p-3"
+                        className="flex items-center gap-3 rounded-lg"
                       >
-                        <PackageIcon className="h-5 w-5" />
+                        <PackageIcon size={16} />
                         <p className="font-semibold">Meus Pedidos</p>
                       </Link>
 
                       <Link
                         href="/cart/identification"
-                        className="flex items-center gap-3 rounded-lg p-3"
+                        className="flex items-center gap-3 rounded-lg"
                       >
-                        <ShoppingCartIcon className="h-5 w-5" />
+                        <ShoppingCartIcon size={16} />
                         <p className="font-semibold">Carrinho</p>
                       </Link>
                     </>
@@ -119,53 +116,35 @@ export const Header = () => {
                   <Separator />
                 </div>
 
-                {/* Categories */}
-                <div className="space-y-1 px-5">
-                  <h3 className="mb-3 text-sm font-semibold tracking-wider uppercase">
+                <div className="space-y-6 px-6">
+                  <h3 className="text-muted-foreground mb-5 font-semibold tracking-wider uppercase">
                     Categorias
                   </h3>
+                  <div className="flex flex-col space-y-6 px-2">
+                    <Link href="/category/camisetas">
+                      <p className="font-semibold">Camisetas</p>
+                    </Link>
 
-                  <Link
-                    href="/category/camisetas"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <p className="font-semibold">Camisetas</p>
-                  </Link>
+                    <Link href="/category/bermuda-shorts">
+                      <p className="font-semibold">Bermuda & Shorts</p>
+                    </Link>
 
-                  <Link
-                    href="/category/bermuda-shorts"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <p className="font-semibold">Bermuda & Shorts</p>
-                  </Link>
+                    <Link href="/category/calcas">
+                      <p className="font-semibold">Calças</p>
+                    </Link>
 
-                  <Link
-                    href="/category/calcas"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <p className="font-semibold">Calças</p>
-                  </Link>
+                    <Link href="/category/jaquetas-moletons">
+                      <p className="font-semibold">Jaquetas & Moletons</p>
+                    </Link>
 
-                  <Link
-                    href="/category/jaquetas-moletons"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <p className="font-semibold">Jaquetas & Moletons</p>
-                  </Link>
+                    <Link href="/category/tenis">
+                      <p className="font-semibold">Tênis</p>
+                    </Link>
 
-                  <Link
-                    href="/category/tenis"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <p className="font-semibold">Tênis</p>
-                  </Link>
-
-                  <Link
-                    href="/category/acessorios"
-                    className="flex items-center gap-3 rounded-lg p-3"
-                  >
-                    <p className="font-semibold">Acessórios</p>
-                  </Link>
+                    <Link href="/category/acessorios">
+                      <p className="font-semibold">Acessórios</p>
+                    </Link>
+                  </div>
                 </div>
 
                 {/* Logout Button */}
@@ -177,7 +156,7 @@ export const Header = () => {
 
                     <div className="px-5">
                       <button
-                        className="text-muted-foreground flex w-full items-center gap-3 p-3 font-semibold"
+                        className="text-muted-foreground flex w-full items-center gap-2 p-2 font-semibold"
                         onClick={() => authClient.signOut()}
                       >
                         <LogOutIcon className="h-5 w-5" />

@@ -32,9 +32,12 @@ const Orders = ({ orders }: OrdersProps) => {
           <CardContent>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
-                <AccordionTrigger>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">
+                <AccordionTrigger className="flex py-0 justify-between items-center">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm font-semibold">
+                      Pedido #{Math.abs(order.id.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)) % 100000}
+                    </p>
+                    <p className="text-muted-foreground font-medium">
                       Pedido feito em{" "}
                       {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                     </p>

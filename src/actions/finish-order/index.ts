@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 import { clearNewCart, getNewCart } from "@/actions/create-new-cart";
@@ -32,28 +32,35 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
       items: { with: { productVariant: true } },
     },
   });
-  const items =
-    hasCheckoutSession && checkoutSession
-      ? [
-          {
-            productVariant: await db.query.productVariantTable.findFirst({
-              where: (pv, { eq }) =>
-                eq(pv.id, checkoutSession.productVariantId),
-            }),
-            quantity: checkoutSession.quantity,
-          },
-        ].filter((i) => i.productVariant)
-      : cart?.items || [];
-  const shippingAddress =
-    hasCheckoutSession && checkoutSession?.shippingAddressId
-      ? await db.query.shippingAddressTable.findFirst({
-          where: (sa, { eq, and }) =>
-            and(
-              eq(sa.id, checkoutSession.shippingAddressId!),
-              eq(sa.userId, session.user.id),
-            ),
-        })
-      : cart?.shippingAddress;
+  let items;
+  if (hasCheckoutSession && checkoutSession) {
+    const productVariant = await db.query.productVariantTable.findFirst({
+      where: (pv, { eq }) => eq(pv.id, checkoutSession.productVariantId),
+    });
+    if (!productVariant) {
+      throw new Error("Product variant not found");
+    }
+    items = [
+      {
+        productVariant,
+        quantity: checkoutSession.quantity,
+      },
+    ];
+  } else {
+    items = cart?.items || [];
+  }
+  let shippingAddress;
+  if (hasCheckoutSession && checkoutSession?.shippingAddressId) {
+    shippingAddress = await db.query.shippingAddressTable.findFirst({
+      where: (sa, { eq, and }) =>
+        and(
+          eq(sa.id, checkoutSession.shippingAddressId!),
+          eq(sa.userId, session.user.id),
+        ),
+    });
+  } else {
+    shippingAddress = cart?.shippingAddress;
+  }
   if (!shippingAddress) {
     throw new Error("Shipping address not found");
   }

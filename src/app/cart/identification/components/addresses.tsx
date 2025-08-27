@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Trash2Icon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -23,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
+import { useDeleteShippingAddress } from "@/hooks/mutations/use-delete-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
 import { useUpdateNewCartAddress } from "@/hooks/mutations/use-update-checkout-session-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
@@ -61,6 +63,7 @@ const Addresses = ({
     defaultShippingAddressId || null,
   );
   const createShippingAddressMutation = useCreateShippingAddress();
+  const deleteShippingAddressMutation = useDeleteShippingAddress();
   const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
   const updateNewCartAddressMutation = useUpdateNewCartAddress({
     checkoutSessionId: checkoutSessionId || "",
@@ -90,16 +93,28 @@ const Addresses = ({
     try {
       const newAddress =
         await createShippingAddressMutation.mutateAsync(values);
-      toast.success("Endereço criado com sucesso!");
       form.reset();
       setSelectedAddress(newAddress.id);
 
       await updateCartShippingAddressMutation.mutateAsync({
         shippingAddressId: newAddress.id,
       });
-      toast.success("Endereço vinculado ao carrinho!");
     } catch (error) {
       toast.error("Erro ao criar endereço. Tente novamente.");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    try {
+      await deleteShippingAddressMutation.mutateAsync(addressId);
+      toast.success("Endereço removido com sucesso!");
+
+      if (selectedAddress === addressId) {
+        setSelectedAddress(null);
+      }
+    } catch (error) {
+      toast.error("Erro ao remover endereço. Tente novamente.");
       console.error(error);
     }
   };
@@ -118,7 +133,6 @@ const Addresses = ({
       await updateCartShippingAddressMutation.mutateAsync({
         shippingAddressId: selectedAddress,
       });
-      toast.success("Endereço selecionado para entrega!");
       router.push("/cart/confirmation");
     } catch (error) {
       toast.error("Erro ao selecionar endereço. Tente novamente.");
@@ -151,17 +165,28 @@ const Addresses = ({
             {addresses?.map((address) => (
               <Card key={address.id}>
                 <CardContent>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value={address.id} id={address.id} />
-                    <div className="flex-1">
-                      <Label htmlFor={address.id} className="cursor-pointer">
-                        <div>
-                          <p className="text-sm whitespace-pre-line">
-                            {formatAddress(address)}
-                          </p>
-                        </div>
-                      </Label>
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex flex-1 items-center space-x-2">
+                      <RadioGroupItem value={address.id} id={address.id} />
+                      <div className="flex-1">
+                        <Label htmlFor={address.id} className="cursor-pointer">
+                          <div>
+                            <p className="text-sm whitespace-pre-line">
+                              {formatAddress(address)}
+                            </p>
+                          </div>
+                        </Label>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteAddress(address.id)}
+                      disabled={deleteShippingAddressMutation.isPending}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2Icon className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

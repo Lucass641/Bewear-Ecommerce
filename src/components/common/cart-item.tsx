@@ -43,18 +43,10 @@ const CartItem = ({
     });
   };
   const handleDecreaseQuantityClick = () => {
-    decreaseCartProductQuantityMutation.mutate(undefined, {
-      onSuccess: () => {
-        toast.success("Quantidade do produto diminuida.");
-      },
-    });
+    decreaseCartProductQuantityMutation.mutate();
   };
   const handleIncreaseQuantityClick = () => {
-    increaseCartProductQuantityMutation.mutate(undefined, {
-      onSuccess: () => {
-        toast.success("Quantidade do produto aumentada.");
-      },
-    });
+    increaseCartProductQuantityMutation.mutate();
   };
   return (
     <div className="flex items-center justify-between">

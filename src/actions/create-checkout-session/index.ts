@@ -16,8 +16,15 @@ export const createCheckoutSession = async (
   data: CreateCheckoutSessionSchema,
 ) => {
   if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("STRIPE_SECRET_KEY não está configurada");
     throw new Error("Stripe secret key is not set");
   }
+
+  if (!process.env.NEXT_PUBLIC_APP_URL) {
+    console.error("NEXT_PUBLIC_APP_URL não está configurada");
+    throw new Error("App URL is not set");
+  }
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -41,30 +48,41 @@ export const createCheckoutSession = async (
     },
   });
 
+  if (orderItems.length === 0) {
+    throw new Error("No order items found");
+  }
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  const checkoutSession = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    mode: "payment",
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
-    metadata: {
-      orderId,
-    },
-    line_items: orderItems.map((orderItem) => {
-      return {
-        price_data: {
-          currency: "BRL",
-          product_data: {
-            name: `${orderItem.productVariant.product.name} - ${orderItem.productVariant.name}`,
-            description: orderItem.productVariant.product.description,
-            images: [orderItem.productVariant.imageUrl],
+
+  try {
+    const checkoutSession = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
+      metadata: {
+        orderId,
+      },
+      line_items: orderItems.map((orderItem) => {
+        return {
+          price_data: {
+            currency: "brl",
+            product_data: {
+              name: `${orderItem.productVariant.product.name} - ${orderItem.productVariant.name}`,
+              description: orderItem.productVariant.product.description,
+              images: [orderItem.productVariant.imageUrl],
+            },
+            unit_amount: orderItem.productVariant.priceInCents,
           },
-          // Em centavos
-          unit_amount: orderItem.productVariant.priceInCents,
-        },
-        quantity: orderItem.quantity,
-      };
-    }),
-  });
-  return checkoutSession;
+          quantity: orderItem.quantity,
+        };
+      }),
+    });
+
+    console.log("Checkout session created successfully:", checkoutSession.id);
+    return checkoutSession;
+  } catch (error) {
+    console.error("Error creating Stripe checkout session:", error);
+    throw new Error("Failed to create checkout session");
+  }
 };

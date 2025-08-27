@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,21 +32,22 @@ const CheckoutSuccessPage = () => {
             na seção de “Meus Pedidos”.
           </DialogDescription>
           <DialogFooter>
-            <Button
-              className="rounded-full"
-              variant="outline"
-              size="lg"
-              asChild
-            >
-              <Link href="/">Pagina inicial</Link>
-            </Button>
-            <Button className="rounded-full" size="lg">
-              Ver meus pedidos
-            </Button>
+            <div className="flex w-full flex-col items-center justify-center gap-2">
+              <Button className="w-full rounded-full" size="lg" asChild>
+                <Link href="/my-orders">Ver meus pedidos</Link>
+              </Button>
+              <Button
+                className="w-full rounded-full"
+                variant="outline"
+                size="lg"
+                asChild
+              >
+                <Link href="/">Pagina inicial</Link>
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Footer />
     </>
   );
 };
