@@ -148,8 +148,6 @@ export const shippingAddressTable = pgTable("shipping_address", {
   zipCode: text().notNull(),
   country: text().notNull(),
   phone: text().notNull(),
-  email: text().notNull(),
-  cpf: text().notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -243,8 +241,6 @@ export const orderTable = pgTable("order", {
   zipCode: text().notNull(),
   country: text().notNull(),
   phone: text().notNull(),
-  email: text().notNull(),
-  cpf: text().notNull(),
   totalPriceInCents: integer("total_price_in_cents").notNull(),
   status: orderStatus().notNull().default("pending"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

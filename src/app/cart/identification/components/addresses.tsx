@@ -1,51 +1,22 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Trash2Icon } from "lucide-react";
+import { Loader2, Plus, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { PatternFormat } from "react-number-format";
 import { toast } from "sonner";
-import z from "zod";
 
+import { UpdateCartShippingAddressSchema } from "@/actions/update-cart-shipping-address/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { shippingAddressTable } from "@/db/schema";
-import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useDeleteShippingAddress } from "@/hooks/mutations/use-delete-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
-import { UpdateCartShippingAddressSchema } from "@/actions/update-cart-shipping-address/schema";
 
 import { formatAddress } from "../../helpers/address";
-
-const formSchema = z.object({
-  email: z.email("E-mail inválido."),
-  fullName: z.string().min(1, "Nome completo é obrigatório."),
-  cpf: z.string().min(14, "CPF inválido."),
-  phone: z.string().min(15, "Celular inválido."),
-  zipCode: z.string().min(9, "CEP inválido."),
-  address: z.string().min(1, "Endereço é obrigatório."),
-  number: z.string().min(1, "Número é obrigatório."),
-  complement: z.string().optional(),
-  neighborhood: z.string().min(1, "Bairro é obrigatório."),
-  city: z.string().min(1, "Cidade é obrigatória."),
-  state: z.string().min(1, "Estado é obrigatório."),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import AddressFormDialog from "./address-form-dialog";
 
 interface AddressesProps {
   shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
@@ -60,54 +31,29 @@ const Addresses = ({
   const [selectedAddress, setSelectedAddress] = useState<string | null>(
     defaultShippingAddressId || null,
   );
-  const createShippingAddressMutation = useCreateShippingAddress();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const deleteShippingAddressMutation = useDeleteShippingAddress();
   const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
   const { data: addresses, isPending } = useUserAddresses({
     initialData: shippingAddresses,
   });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      fullName: "",
-      cpf: "",
-      phone: "",
-      zipCode: "",
-      address: "",
-      number: "",
-      complement: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-    },
-  });
+  const handleAddressCreated = async (addressId: string) => {
+    setSelectedAddress(addressId);
 
-  const onSubmit = async (values: FormValues) => {
-    try {
-      const newAddress =
-        await createShippingAddressMutation.mutateAsync(values);
-      form.reset();
-      setSelectedAddress(newAddress.id);
+    // Verificar se estamos no fluxo "Buy Now"
+    const buyNowFlag = localStorage.getItem("buyNow");
+    const tempCartId = localStorage.getItem("temporaryCartId");
 
-      // Verificar se estamos no fluxo "Buy Now"
-      const buyNowFlag = localStorage.getItem("buyNow");
-      const tempCartId = localStorage.getItem("temporaryCartId");
+    const updateData: UpdateCartShippingAddressSchema = {
+      shippingAddressId: addressId,
+    };
 
-      const updateData: UpdateCartShippingAddressSchema = {
-        shippingAddressId: newAddress.id,
-      };
-
-      // Se estamos no fluxo "Buy Now", passar o cartId do carrinho temporário
-      if (buyNowFlag === "true" && tempCartId) {
-        updateData.cartId = tempCartId;
-      }
-      await updateCartShippingAddressMutation.mutateAsync(updateData);
-    } catch (error) {
-      toast.error("Erro ao criar endereço. Tente novamente.");
-      console.error(error);
+    // Se estamos no fluxo "Buy Now", passar o cartId do carrinho temporário
+    if (buyNowFlag === "true" && tempCartId) {
+      updateData.cartId = tempCartId;
     }
+    await updateCartShippingAddressMutation.mutateAsync(updateData);
   };
 
   const handleDeleteAddress = async (addressId: string) => {
@@ -125,10 +71,9 @@ const Addresses = ({
   };
 
   const handleConfirmOrder = async () => {
-    if (!selectedAddress || selectedAddress === "add_new") return;
+    if (!selectedAddress) return;
 
     try {
-      // Verificar se estamos no fluxo "Buy Now"
       const buyNowFlag = localStorage.getItem("buyNow");
       const tempCartId = localStorage.getItem("temporaryCartId");
 
@@ -136,7 +81,6 @@ const Addresses = ({
         shippingAddressId: selectedAddress,
       };
 
-      // Se estamos no fluxo "Buy Now", passar o cartId do carrinho temporário
       if (buyNowFlag === "true" && tempCartId) {
         updateData.cartId = tempCartId;
       }
@@ -151,285 +95,108 @@ const Addresses = ({
   const isConfirmOrderLoading = updateCartShippingAddressMutation.isPending;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Identificação</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isPending ? (
-          <div className="py-4 text-center">
-            <p>Carregando endereços...</p>
-          </div>
-        ) : (
-          <RadioGroup
-            value={selectedAddress}
-            onValueChange={setSelectedAddress}
-          >
-            {addresses?.length === 0 && (
-              <div className="py-4 text-center">
-                <p className="text-muted-foreground">
-                  Você ainda não possui endereços cadastrados.
-                </p>
-              </div>
-            )}
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Identificação</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isPending ? (
+            <div className="py-4 text-center">
+              <p>Carregando endereços...</p>
+            </div>
+          ) : (
+            <RadioGroup
+              value={selectedAddress}
+              onValueChange={setSelectedAddress}
+            >
+              {addresses?.length === 0 && (
+                <div className="py-4 text-center">
+                  <p className="text-muted-foreground">
+                    Você ainda não possui endereços cadastrados.
+                  </p>
+                </div>
+              )}
 
-            {addresses?.map((address) => (
-              <Card key={address.id}>
-                <CardContent>
-                  <div className="flex items-center justify-between space-x-2">
-                    <div className="flex flex-1 items-center space-x-2">
-                      <RadioGroupItem value={address.id} id={address.id} />
-                      <div className="flex-1">
-                        <Label htmlFor={address.id} className="cursor-pointer">
-                          <div>
-                            <p className="text-sm whitespace-pre-line">
-                              {formatAddress(address)}
-                            </p>
-                          </div>
-                        </Label>
+              {addresses?.map((address) => (
+                <Card key={address.id}>
+                  <CardContent>
+                    <div className="flex items-center justify-between space-x-2">
+                      <div className="flex flex-1 items-center space-x-2">
+                        <RadioGroupItem value={address.id} id={address.id} />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor={address.id}
+                            className="cursor-pointer"
+                          >
+                            <div>
+                              <p className="text-sm whitespace-pre-line">
+                                {formatAddress(address)}
+                              </p>
+                            </div>
+                          </Label>
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteAddress(address.id)}
+                        disabled={deleteShippingAddressMutation.isPending}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2Icon className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteAddress(address.id)}
-                      disabled={deleteShippingAddressMutation.isPending}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2Icon className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Card className="border-muted-foreground/25 hover:border-muted-foreground/50 border-2 border-dashed transition-colors">
+                <CardContent className="p-6">
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="w-full hover:bg-transparent"
+                    onClick={() => setIsDialogOpen(true)}
+                  >
+                    <div className="flex flex-col items-center space-y-2 py-4">
+                      <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+                        <Plus className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-medium">
+                        Adicionar novo endereço
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        Preencha os dados de entrega
+                      </span>
+                    </div>
+                  </Button>
                 </CardContent>
               </Card>
-            ))}
+            </RadioGroup>
+          )}
 
-            <Button
-              variant={selectedAddress === "add_new" ? "default" : "outline"}
-              type="button"
-              className="w-full rounded-full"
-              onClick={() => setSelectedAddress("add_new")}
-            >
-              <div className="flex items-center">
-                <span className="text-sm">Adicionar novo endereço</span>
-              </div>
-            </Button>
-          </RadioGroup>
-        )}
-
-        {selectedAddress && selectedAddress !== "add_new" && (
-          <div className="mt-4">
-            <Button
-              onClick={handleConfirmOrder}
-              className="w-full rounded-full"
-              disabled={isConfirmOrderLoading}
-            >
-              {isConfirmOrderLoading && <Loader2 className="animate-spin" />}
-              {isConfirmOrderLoading ? "Processando..." : "Confirmar pedido"}
-            </Button>
-          </div>
-        )}
-
-        {selectedAddress === "add_new" && (
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="mt-4 space-y-4"
-            >
-              <div className="grid gap-4 md:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite seu email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome completo</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Digite seu nome completo"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cpf"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CPF</FormLabel>
-                      <FormControl>
-                        <PatternFormat
-                          format="###.###.###-##"
-                          placeholder="000.000.000-00"
-                          customInput={Input}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Celular</FormLabel>
-                      <FormControl>
-                        <PatternFormat
-                          format="(##) #####-####"
-                          placeholder="(11) 99999-9999"
-                          customInput={Input}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="zipCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CEP</FormLabel>
-                      <FormControl>
-                        <PatternFormat
-                          format="#####-###"
-                          placeholder="00000-000"
-                          customInput={Input}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Endereço</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite seu endereço" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o número" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="complement"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Complemento</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Apto, bloco, etc. (opcional)"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="neighborhood"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bairro</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o bairro" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cidade</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite a cidade" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estado</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o estado" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+          {selectedAddress && (
+            <div className="mt-4">
               <Button
-                type="submit"
-                className="w-full"
-                disabled={
-                  createShippingAddressMutation.isPending ||
-                  updateCartShippingAddressMutation.isPending
-                }
+                onClick={handleConfirmOrder}
+                className="w-full rounded-full"
+                disabled={isConfirmOrderLoading}
               >
-                {createShippingAddressMutation.isPending ||
-                updateCartShippingAddressMutation.isPending
-                  ? "Salvando..."
-                  : "Salvar endereço"}
+                {isConfirmOrderLoading && <Loader2 className="animate-spin" />}
+                {isConfirmOrderLoading ? "Processando..." : "Confirmar pedido"}
               </Button>
-            </form>
-          </Form>
-        )}
-      </CardContent>
-    </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AddressFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSuccess={handleAddressCreated}
+      />
+    </>
   );
 };
 

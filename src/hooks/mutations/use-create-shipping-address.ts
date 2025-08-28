@@ -14,5 +14,8 @@ export const useCreateShippingAddress = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: getUserAddressesQueryKey() });
     },
+    onError: (error) => {
+      console.error("Error in create shipping address mutation:", error);
+    },
   });
 };

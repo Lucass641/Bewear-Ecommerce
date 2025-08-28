@@ -71,11 +71,9 @@ export const finishOrder = async (
     const [order] = await tx
       .insert(orderTable)
       .values({
-        email: cart.shippingAddress.email,
         zipCode: cart.shippingAddress.zipCode,
         country: cart.shippingAddress.country,
         phone: cart.shippingAddress.phone,
-        cpf: cart.shippingAddress.cpf,
         city: cart.shippingAddress.city,
         complement: cart.shippingAddress.complement,
         neighborhood: cart.shippingAddress.neighborhood,

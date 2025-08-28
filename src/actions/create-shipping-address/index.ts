@@ -15,36 +15,42 @@ import {
 export const createShippingAddress = async (
   data: CreateShippingAddressSchema,
 ) => {
-  createShippingAddressSchema.parse(data);
+  try {
+    createShippingAddressSchema.parse(data);
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-  if (!session?.user) {
-    throw new Error("Unauthorized");
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+
+    const [shippingAddress] = await db
+      .insert(shippingAddressTable)
+      .values({
+        userId: session.user.id,
+        recipientName: data.fullName,
+        street: data.address,
+        number: data.number,
+        complement: data.complement || undefined,
+        city: data.city,
+        state: data.state,
+        neighborhood: data.neighborhood,
+        zipCode: data.zipCode,
+        country: "Brasil",
+        phone: data.phone,
+      })
+      .returning();
+
+    revalidatePath("/cart/identification");
+
+    return shippingAddress;
+  } catch (error) {
+    console.error("Error creating shipping address:", error);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erro interno do servidor");
   }
-
-  const [shippingAddress] = await db
-    .insert(shippingAddressTable)
-    .values({
-      userId: session.user.id,
-      recipientName: data.fullName,
-      street: data.address,
-      number: data.number,
-      complement: data.complement,
-      city: data.city,
-      state: data.state,
-      neighborhood: data.neighborhood,
-      zipCode: data.zipCode,
-      country: "Brasil",
-      phone: data.phone,
-      email: data.email,
-      cpf: data.cpf,
-    })
-    .returning();
-
-  revalidatePath("/cart/identification");
-
-  return shippingAddress;
 };
