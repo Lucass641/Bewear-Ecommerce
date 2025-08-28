@@ -2,65 +2,62 @@
 
 import { loadStripe } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { Button } from "@/components/ui/button";
 import { useFinishOrder } from "@/hooks/mutations/use-finish-order";
 
 const FinishOrderButton = () => {
-  const searchParams = useSearchParams();
-  const checkoutSessionId = searchParams.get("checkoutSessionId") || undefined;
-  const finishOrderMutation = useFinishOrder({ checkoutSessionId });
+  const [isBuyNow, setIsBuyNow] = useState(false);
+  const [temporaryCartId, setTemporaryCartId] = useState<string | null>(null);
+  const finishOrderMutation = useFinishOrder();
+
+  useEffect(() => {
+    const buyNowFlag = localStorage.getItem("buyNow");
+    const tempCartId = localStorage.getItem("temporaryCartId");
+
+    if (buyNowFlag === "true" && tempCartId) {
+      setIsBuyNow(true);
+      setTemporaryCartId(tempCartId);
+    }
+  }, []);
+
   const handleFinishOrder = async () => {
     try {
       if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-        toast.error("Configuração do Stripe não encontrada");
-        console.error(
-          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY não está configurada",
-        );
-        return;
+        throw new Error("Stripe publishable key is not set");
       }
 
-      const { orderId } = await finishOrderMutation.mutateAsync();
+      const clearCartAfterOrder = !isBuyNow;
+      const cartIdToUse =
+        isBuyNow && temporaryCartId ? temporaryCartId : undefined;
 
-      if (!orderId) {
-        toast.error("Erro ao criar pedido. Tente novamente.");
-        return;
-      }
+      const { orderId } = await finishOrderMutation.mutateAsync({
+        clearCartAfterOrder,
+        cartId: cartIdToUse,
+      });
 
       const checkoutSession = await createCheckoutSession({
         orderId,
       });
-
-      if (!checkoutSession?.id) {
-        toast.error("Erro ao criar sessão de pagamento. Tente novamente.");
-        return;
-      }
 
       const stripe = await loadStripe(
         process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       );
 
       if (!stripe) {
-        toast.error("Erro ao carregar Stripe. Tente novamente.");
-        return;
+        throw new Error("Failed to load Stripe");
       }
 
-      const { error } = await stripe.redirectToCheckout({
+      await stripe.redirectToCheckout({
         sessionId: checkoutSession.id,
       });
-
-      if (error) {
-        toast.error("Erro ao redirecionar para pagamento. Tente novamente.");
-        console.error("Stripe redirect error:", error);
-      }
     } catch (error) {
-      toast.error("Erro ao processar pagamento. Tente novamente.");
-      console.error("Checkout error:", error);
+      throw error;
     }
   };
+
   return (
     <>
       <Button
@@ -69,8 +66,10 @@ const FinishOrderButton = () => {
         onClick={handleFinishOrder}
         disabled={finishOrderMutation.isPending}
       >
-        {finishOrderMutation.isPending && <Loader2 className="animate-spin" />}
-        Finalizar compra
+        {finishOrderMutation.isPending && (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        )}
+        Finalizar pedido
       </Button>
     </>
   );

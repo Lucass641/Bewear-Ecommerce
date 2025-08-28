@@ -37,9 +37,19 @@ export const updateCartShippingAddress = async (
     throw new Error("Shipping address not found or unauthorized");
   }
 
-  const cart = await db.query.cartTable.findFirst({
-    where: (cart, { eq }) => eq(cart.userId, session.user.id),
-  });
+  let cart;
+  if (data.cartId) {
+    // Se um cartId foi fornecido, buscar esse carrinho específico
+    cart = await db.query.cartTable.findFirst({
+      where: (cart, { eq, and }) =>
+        and(eq(cart.id, data.cartId!), eq(cart.userId, session.user.id)),
+    });
+  } else {
+    // Caso contrário, buscar o primeiro carrinho do usuário
+    cart = await db.query.cartTable.findFirst({
+      where: (cart, { eq }) => eq(cart.userId, session.user.id),
+    });
+  }
 
   if (!cart) {
     throw new Error("Cart not found");

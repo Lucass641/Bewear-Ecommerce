@@ -6,17 +6,20 @@ import { getUseCartQueryKey } from "../queries/use-cart";
 
 export const getUseFinishOrderMutationKey = () => ["finish-order"];
 
-export const useFinishOrder = (params?: { checkoutSessionId?: string }) => {
+export const useFinishOrder = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: getUseFinishOrderMutationKey(),
-    mutationFn: async () => {
-      return await finishOrder({ checkoutSessionId: params?.checkoutSessionId });
+    mutationFn: async ({
+      clearCartAfterOrder = true,
+      cartId,
+    }: {
+      clearCartAfterOrder?: boolean;
+      cartId?: string;
+    } = {}) => {
+      return await finishOrder(clearCartAfterOrder, cartId);
     },
     onSuccess: () => {
-      try {
-        sessionStorage.removeItem("ephemeralCartItemId");
-      } catch {}
       queryClient.invalidateQueries({ queryKey: getUseCartQueryKey() });
     },
   });

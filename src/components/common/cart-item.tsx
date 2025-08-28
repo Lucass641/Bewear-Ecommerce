@@ -1,4 +1,4 @@
-import { MinusIcon, PlusIcon, Trash2 } from "lucide-react";
+import {  MinusIcon, PlusIcon, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ const CartItem = ({
   const decreaseCartProductQuantityMutation = useDecreaseCartProduct(id);
   const increaseCartProductQuantityMutation =
     useIncreaseCartProduct(productVariantId);
+
   const handleDeleteClick = () => {
     removeProductFromCartMutation.mutate(undefined, {
       onSuccess: () => {
@@ -42,12 +43,17 @@ const CartItem = ({
       },
     });
   };
+
   const handleDecreaseQuantityClick = () => {
     decreaseCartProductQuantityMutation.mutate();
   };
+
   const handleIncreaseQuantityClick = () => {
     increaseCartProductQuantityMutation.mutate();
   };
+
+  const totalPriceInCents = productVariantPriceInCents * quantity;
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -88,7 +94,7 @@ const CartItem = ({
       </div>
       <div className="flex flex-col">
         <p className="text-sm font-semibold">
-          {formatCentsToBRL(productVariantPriceInCents)}
+          {formatCentsToBRL(totalPriceInCents)}
         </p>
       </div>
     </div>

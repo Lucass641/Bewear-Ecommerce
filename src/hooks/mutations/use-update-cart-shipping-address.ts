@@ -4,6 +4,7 @@ import { updateCartShippingAddress } from "@/actions/update-cart-shipping-addres
 import { UpdateCartShippingAddressSchema } from "@/actions/update-cart-shipping-address/schema";
 
 import { getUseCartQueryKey } from "../queries/use-cart";
+import { getUseTemporaryCartQueryKey } from "../queries/use-temporary-cart";
 
 export const getUpdateCartShippingAddressMutationKey = () => [
   "update-cart-shipping-address",
@@ -16,10 +17,18 @@ export const useUpdateCartShippingAddress = () => {
     mutationKey: getUpdateCartShippingAddressMutationKey(),
     mutationFn: (data: UpdateCartShippingAddressSchema) =>
       updateCartShippingAddress(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Invalidar carrinho principal
       queryClient.invalidateQueries({
         queryKey: getUseCartQueryKey(),
       });
+
+      // Se foi atualizado um carrinho temporário, invalidar também
+      if (variables.cartId) {
+        queryClient.invalidateQueries({
+          queryKey: getUseTemporaryCartQueryKey(variables.cartId),
+        });
+      }
     },
   });
 };

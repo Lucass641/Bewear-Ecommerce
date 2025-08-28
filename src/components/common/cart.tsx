@@ -1,11 +1,11 @@
 "use client";
 import { Separator } from "@radix-ui/react-separator";
-import { ShoppingBag, ShoppingBagIcon } from "lucide-react";
+import { Loader2, ShoppingBag, ShoppingBagIcon } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { formatCentsToBRL } from "@/helpers/money";
 import { useCart } from "@/hooks/queries/use-cart";
-import { authClient } from "@/lib/auth-client";
 
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
@@ -19,12 +19,15 @@ import {
 import CartItem from "./cart-item";
 
 export const Cart = () => {
-  const { data: session } = authClient.useSession();
-  const { data: cart } = useCart({
-    enabled: !!session?.user,
-  });
+  const { data: cart, isPending } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const handleContinueClick = () => {
+    setIsCartOpen(false);
+  };
+
   return (
-    <Sheet>
+    <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon">
           <ShoppingBag className="size-6" />
@@ -41,20 +44,38 @@ export const Cart = () => {
           <div className="flex h-full max-h-full flex-col overflow-hidden">
             <ScrollArea className="h-full">
               <div className="flex h-full flex-col gap-8">
-                {cart?.items.map((item) => (
-                  <CartItem
-                    key={item.id}
-                    id={item.id}
-                    productVariantId={item.productVariant.id}
-                    productName={item.productVariant.product.name}
-                    productVariantName={item.productVariant.name}
-                    productVariantImageUrl={item.productVariant.imageUrl}
-                    productVariantPriceInCents={
-                      item.productVariant.priceInCents
-                    }
-                    quantity={item.quantity}
-                  />
-                ))}
+                {isPending ? (
+                  <div className="flex h-full items-center justify-center">
+                    <Loader2 className="size-6 animate-spin" />
+                  </div>
+                ) : cart?.items && cart.items.length > 0 ? (
+                  cart.items.map((item) => (
+                    <CartItem
+                      key={item.id}
+                      id={item.id}
+                      productVariantId={item.productVariant.id}
+                      productName={item.productVariant.product.name}
+                      productVariantName={item.productVariant.name}
+                      productVariantImageUrl={item.productVariant.imageUrl}
+                      productVariantPriceInCents={
+                        item.productVariant.priceInCents
+                      }
+                      quantity={item.quantity}
+                    />
+                  ))
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+                    <ShoppingBagIcon className="size-16 opacity-20" />
+                    <div className="space-y-2">
+                      <p className="text-lg font-semibold">
+                        Sua sacola está vazia
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        Adicione produtos para começar suas compras
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </ScrollArea>
           </div>
@@ -75,8 +96,15 @@ export const Cart = () => {
                 <p>Total</p>
                 <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
               </div>
-              <Button className="mt-5 rounded-full" asChild>
-                <Link href="/cart/identification">Finalizar compra</Link>
+              <Button
+                className="mt-5 rounded-full"
+                asChild
+                disabled={isPending}
+              >
+                <Link href="/cart/identification" onClick={handleContinueClick}>
+                  {isPending && <Loader2 className="mr-2 animate-spin" />}
+                  Continuar
+                </Link>
               </Button>
             </div>
           )}

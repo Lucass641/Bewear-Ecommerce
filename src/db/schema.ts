@@ -177,6 +177,7 @@ export const cartTable = pgTable("cart", {
     () => shippingAddressTable.id,
     { onDelete: "set null" },
   ),
+  isTemporary: boolean("is_temporary").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -218,8 +219,10 @@ export const cartItemRelations = relations(cartItemTable, ({ one }) => ({
 export const orderStatus = pgEnum("order_status", [
   "pending",
   "paid",
+  "processing",
+  "shipped",
+  "delivered",
   "canceled",
-  "completed",
 ]);
 
 export const orderTable = pgTable("order", {

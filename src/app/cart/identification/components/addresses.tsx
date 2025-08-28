@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash2Icon } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
@@ -26,8 +26,8 @@ import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 import { useDeleteShippingAddress } from "@/hooks/mutations/use-delete-shipping-address";
 import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
-import { useUpdateNewCartAddress } from "@/hooks/mutations/use-update-checkout-session-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
+import { UpdateCartShippingAddressSchema } from "@/actions/update-cart-shipping-address/schema";
 
 import { formatAddress } from "../../helpers/address";
 
@@ -57,18 +57,13 @@ const Addresses = ({
   defaultShippingAddressId,
 }: AddressesProps) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const checkoutSessionId = searchParams.get("checkoutSessionId");
   const [selectedAddress, setSelectedAddress] = useState<string | null>(
     defaultShippingAddressId || null,
   );
   const createShippingAddressMutation = useCreateShippingAddress();
   const deleteShippingAddressMutation = useDeleteShippingAddress();
   const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
-  const updateNewCartAddressMutation = useUpdateNewCartAddress({
-    checkoutSessionId: checkoutSessionId || "",
-  });
-  const { data: addresses, isLoading } = useUserAddresses({
+  const { data: addresses, isPending } = useUserAddresses({
     initialData: shippingAddresses,
   });
 
@@ -96,9 +91,19 @@ const Addresses = ({
       form.reset();
       setSelectedAddress(newAddress.id);
 
-      await updateCartShippingAddressMutation.mutateAsync({
+      // Verificar se estamos no fluxo "Buy Now"
+      const buyNowFlag = localStorage.getItem("buyNow");
+      const tempCartId = localStorage.getItem("temporaryCartId");
+
+      const updateData: UpdateCartShippingAddressSchema = {
         shippingAddressId: newAddress.id,
-      });
+      };
+
+      // Se estamos no fluxo "Buy Now", passar o cartId do carrinho temporário
+      if (buyNowFlag === "true" && tempCartId) {
+        updateData.cartId = tempCartId;
+      }
+      await updateCartShippingAddressMutation.mutateAsync(updateData);
     } catch (error) {
       toast.error("Erro ao criar endereço. Tente novamente.");
       console.error(error);
@@ -119,33 +124,39 @@ const Addresses = ({
     }
   };
 
-  const handleGoToPayment = async () => {
+  const handleConfirmOrder = async () => {
     if (!selectedAddress || selectedAddress === "add_new") return;
 
     try {
-      if (checkoutSessionId) {
-        await updateNewCartAddressMutation.mutateAsync(selectedAddress);
-        router.push(
-          `/cart/confirmation?checkoutSessionId=${checkoutSessionId}`,
-        );
-        return;
-      }
-      await updateCartShippingAddressMutation.mutateAsync({
+      // Verificar se estamos no fluxo "Buy Now"
+      const buyNowFlag = localStorage.getItem("buyNow");
+      const tempCartId = localStorage.getItem("temporaryCartId");
+
+      const updateData: UpdateCartShippingAddressSchema = {
         shippingAddressId: selectedAddress,
-      });
+      };
+
+      // Se estamos no fluxo "Buy Now", passar o cartId do carrinho temporário
+      if (buyNowFlag === "true" && tempCartId) {
+        updateData.cartId = tempCartId;
+      }
+      await updateCartShippingAddressMutation.mutateAsync(updateData);
       router.push("/cart/confirmation");
     } catch (error) {
       toast.error("Erro ao selecionar endereço. Tente novamente.");
       console.error(error);
     }
   };
+
+  const isConfirmOrderLoading = updateCartShippingAddressMutation.isPending;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Identificação</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {isPending ? (
           <div className="py-4 text-center">
             <p>Carregando endereços...</p>
           </div>
@@ -208,13 +219,12 @@ const Addresses = ({
         {selectedAddress && selectedAddress !== "add_new" && (
           <div className="mt-4">
             <Button
-              onClick={handleGoToPayment}
+              onClick={handleConfirmOrder}
               className="w-full rounded-full"
-              disabled={updateCartShippingAddressMutation.isPending}
+              disabled={isConfirmOrderLoading}
             >
-              {updateCartShippingAddressMutation.isPending
-                ? "Processando..."
-                : "Ir para pagamento"}
+              {isConfirmOrderLoading && <Loader2 className="animate-spin" />}
+              {isConfirmOrderLoading ? "Processando..." : "Confirmar pedido"}
             </Button>
           </div>
         )}

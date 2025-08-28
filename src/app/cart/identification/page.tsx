@@ -1,20 +1,14 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { notFound } from "next/navigation";
 
-import { getNewCart } from "@/actions/create-new-cart";
-import { Header } from "@/components/common/header";
 import { db } from "@/db";
 import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
-import CartSummary from "../components/cart-summary";
-import Addresses from "./components/addresses";
+import CartIdentificationWrapper from "./components/cart-identification-wrapper";
 
-const IdentificationPage = async (props: {
-  searchParams?: { checkoutSessionId?: string };
-}) => {
+const IdentificationPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -22,9 +16,14 @@ const IdentificationPage = async (props: {
   if (!session?.user.id) {
     redirect("/");
   }
-  const hasCheckoutSession = !!props.searchParams?.checkoutSessionId;
+
+  // Verificar se há um carrinho temporário no localStorage (client-side)
+  // Como esta é uma server component, vamos buscar o carrinho principal primeiro
+  // e deixar o client-side lidar com a lógica do carrinho temporário
+
   const cart = await db.query.cartTable.findFirst({
-    where: (cart, { eq }) => eq(cart.userId, session.user.id),
+    where: (cart, { eq, and }) =>
+      and(eq(cart.userId, session.user.id), eq(cart.isTemporary, false)),
     with: {
       shippingAddress: true,
       items: {
@@ -38,62 +37,17 @@ const IdentificationPage = async (props: {
       },
     },
   });
-  const checkoutSession = props.searchParams?.checkoutSessionId
-    ? await getNewCart(props.searchParams.checkoutSessionId)
-    : null;
-  if (!hasCheckoutSession && (!cart || cart?.items.length == 0)) {
-    redirect("/");
-  }
-  if (
-    hasCheckoutSession &&
-    (!checkoutSession || checkoutSession.userId !== session.user.id)
-  ) {
-    notFound();
-  }
-  const checkoutVariant = checkoutSession
-    ? await db.query.productVariantTable.findFirst({
-        where: (pv, { eq }) => eq(pv.id, checkoutSession.productVariantId),
-        with: { product: true },
-      })
-    : null;
+
   const shippingAddresses = await db.query.shippingAddressTable.findMany({
     where: eq(shippingAddressTable.userId, session.user.id),
   });
-  const cartItems =
-    checkoutSession && checkoutVariant
-      ? [
-          {
-            productVariant: checkoutVariant,
-            quantity: checkoutSession.quantity,
-          },
-        ]
-      : cart?.items || [];
-  const cartTotalInCents = cartItems.reduce(
-    (acc, item) => acc + item.productVariant.priceInCents * item.quantity,
-    0,
-  );
+
   return (
-    <>
-      <Header />
-      <div className="space-y-4 px-5">
-        <Addresses
-          shippingAddresses={shippingAddresses}
-          defaultShippingAddressId={cart?.shippingAddress?.id || null}
-        />
-        <CartSummary
-          subtotalInCents={cartTotalInCents}
-          totalInCents={cartTotalInCents}
-          products={cartItems.map((item) => ({
-            id: item.productVariant.id,
-            name: item.productVariant.product.name,
-            variantName: item.productVariant.name,
-            quantity: item.quantity,
-            priceInCents: item.productVariant.priceInCents,
-            imageUrl: item.productVariant.imageUrl,
-          }))}
-        />
-      </div>
-    </>
+    <CartIdentificationWrapper
+      shippingAddresses={shippingAddresses}
+      defaultShippingAddressId={cart?.shippingAddress?.id || null}
+      serverCart={cart}
+    />
   );
 };
 

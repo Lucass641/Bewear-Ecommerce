@@ -24,19 +24,40 @@ export const addProductToCart = async (data: AddProductToCartSchema) => {
   if (!productVariant) {
     throw new Error("Product variant not found");
   }
-  const cart = await db.query.cartTable.findFirst({
-    where: (cart, { eq }) => eq(cart.userId, session.user.id),
-  });
-  let cartId = cart?.id;
-  if (!cartId) {
+  let cartId: string;
+
+  if (data.createTemporaryCart) {
     const [newCart] = await db
       .insert(cartTable)
       .values({
         userId: session.user.id,
+        isTemporary: true,
       })
       .returning();
     cartId = newCart.id;
+  } else {
+    const cart = await db.query.cartTable.findFirst({
+      where: (cart, { eq, and }) =>
+        and(eq(cart.userId, session.user.id), eq(cart.isTemporary, false)),
+    });
+    if (!cart) {
+      const [newCart] = await db
+        .insert(cartTable)
+        .values({
+          userId: session.user.id,
+          isTemporary: false,
+        })
+        .returning();
+      cartId = newCart.id;
+    } else {
+      cartId = cart.id;
+    }
+
+    if (data.clearCart && cartId) {
+      await db.delete(cartItemTable).where(eq(cartItemTable.cartId, cartId));
+    }
   }
+
   const cartItem = await db.query.cartItemTable.findFirst({
     where: (cartItem, { eq, and }) =>
       and(
@@ -51,11 +72,13 @@ export const addProductToCart = async (data: AddProductToCartSchema) => {
         quantity: cartItem.quantity + data.quantity,
       })
       .where(eq(cartItemTable.id, cartItem.id));
-    return;
+    return { cartId };
   }
   await db.insert(cartItemTable).values({
     cartId,
     productVariantId: data.productVariantId,
     quantity: data.quantity,
   });
+
+  return { cartId };
 };

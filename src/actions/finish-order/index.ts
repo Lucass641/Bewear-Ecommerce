@@ -1,9 +1,8 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { clearNewCart, getNewCart } from "@/actions/create-new-cart";
 import { db } from "@/db";
 import {
   cartItemTable,
@@ -13,7 +12,10 @@ import {
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
-export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
+export const finishOrder = async (
+  clearCartAfterOrder: boolean = true,
+  cartId?: string,
+) => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -21,80 +23,69 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
     throw new Error("Unauthorized");
   }
 
-  const hasCheckoutSession = !!params?.checkoutSessionId;
-  const checkoutSession = params?.checkoutSessionId
-    ? await getNewCart(params.checkoutSessionId)
-    : null;
-  const cart = await db.query.cartTable.findFirst({
-    where: eq(cartTable.userId, session.user.id),
-    with: {
-      shippingAddress: true,
-      items: { with: { productVariant: true } },
-    },
-  });
-  let items;
-  if (hasCheckoutSession && checkoutSession) {
-    const productVariant = await db.query.productVariantTable.findFirst({
-      where: (pv, { eq }) => eq(pv.id, checkoutSession.productVariantId),
-    });
-    if (!productVariant) {
-      throw new Error("Product variant not found");
-    }
-    items = [
-      {
-        productVariant,
-        quantity: checkoutSession.quantity,
+  let cart;
+  if (cartId && cartId.trim() !== "") {
+    // Se um cartId válido foi fornecido, buscar esse carrinho específico
+    cart = await db.query.cartTable.findFirst({
+      where: (cart, { eq, and }) =>
+        and(eq(cart.id, cartId), eq(cart.userId, session.user.id)),
+      with: {
+        shippingAddress: true,
+        items: {
+          with: {
+            productVariant: true,
+          },
+        },
       },
-    ];
-  } else {
-    items = cart?.items || [];
-  }
-  let shippingAddress;
-  if (hasCheckoutSession && checkoutSession?.shippingAddressId) {
-    shippingAddress = await db.query.shippingAddressTable.findFirst({
-      where: (sa, { eq, and }) =>
-        and(
-          eq(sa.id, checkoutSession.shippingAddressId!),
-          eq(sa.userId, session.user.id),
-        ),
     });
   } else {
-    shippingAddress = cart?.shippingAddress;
+    // Caso contrário, buscar o carrinho principal (não temporário)
+    cart = await db.query.cartTable.findFirst({
+      where: (cart, { eq, and }) =>
+        and(eq(cart.userId, session.user.id), eq(cart.isTemporary, false)),
+      with: {
+        shippingAddress: true,
+        items: {
+          with: {
+            productVariant: true,
+          },
+        },
+      },
+    });
   }
-  if (!shippingAddress) {
+  if (!cart) {
+    throw new Error("Cart not found");
+  }
+  if (!cart.shippingAddress) {
     throw new Error("Shipping address not found");
   }
-  if (!items.length) {
-    throw new Error("Cart is empty");
-  }
-  const totalPriceInCents = items.reduce(
-    (acc, item) => acc + item.productVariant!.priceInCents * item.quantity,
+  const totalPriceInCents = cart.items.reduce(
+    (acc, item) => acc + item.productVariant.priceInCents * item.quantity,
     0,
   );
-
   let orderId: string | undefined;
   await db.transaction(async (tx) => {
-    if (!shippingAddress) {
+    if (!cart.shippingAddress) {
       throw new Error("Shipping address not found");
     }
     const [order] = await tx
       .insert(orderTable)
       .values({
-        email: shippingAddress.email,
-        zipCode: shippingAddress.zipCode,
-        country: shippingAddress.country,
-        phone: shippingAddress.phone,
-        cpf: shippingAddress.cpf,
-        city: shippingAddress.city,
-        complement: shippingAddress.complement,
-        neighborhood: shippingAddress.neighborhood,
-        number: shippingAddress.number,
-        recipientName: shippingAddress.recipientName,
-        state: shippingAddress.state,
-        street: shippingAddress.street,
+        email: cart.shippingAddress.email,
+        zipCode: cart.shippingAddress.zipCode,
+        country: cart.shippingAddress.country,
+        phone: cart.shippingAddress.phone,
+        cpf: cart.shippingAddress.cpf,
+        city: cart.shippingAddress.city,
+        complement: cart.shippingAddress.complement,
+        neighborhood: cart.shippingAddress.neighborhood,
+        number: cart.shippingAddress.number,
+        recipientName: cart.shippingAddress.recipientName,
+        state: cart.shippingAddress.state,
+        street: cart.shippingAddress.street,
         userId: session.user.id,
         totalPriceInCents,
-        shippingAddressId: shippingAddress.id,
+        shippingAddressId: cart.shippingAddress!.id,
       })
       .returning();
     if (!order) {
@@ -102,21 +93,18 @@ export const finishOrder = async (params?: { checkoutSessionId?: string }) => {
     }
     orderId = order.id;
     const orderItemsPayload: Array<typeof orderItemTable.$inferInsert> =
-      items.map((item) => ({
+      cart.items.map((item) => ({
         orderId: order.id,
-        productVariantId: item.productVariant!.id,
+        productVariantId: item.productVariant.id,
         quantity: item.quantity,
-        priceInCents: item.productVariant!.priceInCents,
+        priceInCents: item.productVariant.priceInCents,
       }));
     await tx.insert(orderItemTable).values(orderItemsPayload);
-    if (!hasCheckoutSession) {
-      await tx.delete(cartTable).where(eq(cartTable.id, cart!.id));
-      await tx.delete(cartItemTable).where(eq(cartItemTable.cartId, cart!.id));
+    if (clearCartAfterOrder) {
+      await tx.delete(cartTable).where(eq(cartTable.id, cart.id));
+      await tx.delete(cartItemTable).where(eq(cartItemTable.cartId, cart.id));
     }
   });
-  if (hasCheckoutSession && params?.checkoutSessionId) {
-    await clearNewCart(params.checkoutSessionId);
-  }
   if (!orderId) {
     throw new Error("Failed to create order");
   }

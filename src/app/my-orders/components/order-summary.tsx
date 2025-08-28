@@ -1,0 +1,84 @@
+import Image from "next/image";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { formatCentsToBRL } from "@/helpers/money";
+
+interface OrderSummaryProps {
+  subtotalInCents: number;
+  totalInCents: number;
+  products: {
+    id: string;
+    name: string;
+    imageUrl: string;
+    variantName: string;
+    quantity: number;
+    priceInCents: number;
+  }[];
+}
+
+const OrderSummary = ({
+  subtotalInCents,
+  totalInCents,
+  products,
+}: OrderSummaryProps) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">Resumo do Pedido</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="space-y-4">
+          {products.map((product) => (
+            <div key={product.id}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    width={78}
+                    height={78}
+                    className="rounded-lg"
+                  />
+                  <div className="mx-2 flex flex-col">
+                    <p className="font-semibold">{product.name}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {product.variantName} x {product.quantity}
+                    </p>
+                    <p className="text-sm font-semibold">
+                      {formatCentsToBRL(product.priceInCents * product.quantity)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <Separator className="my-4" />
+            </div>
+          ))}
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <p className="text-sm">Subtotal</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                {formatCentsToBRL(subtotalInCents)}
+              </p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-sm">Frete</p>
+              <p className="text-muted-foreground text-sm font-medium">
+                Grátis
+              </p>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <p className="text-sm font-semibold">Total</p>
+              <p className="text-sm font-semibold">
+                {formatCentsToBRL(totalInCents)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default OrderSummary;

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -24,8 +25,37 @@ import {
 } from "../ui/sheet";
 import { Cart } from "./cart";
 
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export const Header = () => {
   const { data: session } = authClient.useSession();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar categorias:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <header className="mb-10 flex items-center justify-between p-5">
       <Link href="/">
@@ -35,7 +65,7 @@ export const Header = () => {
       <div className="flex items-center gap-2">
         <Cart />
         <div className="h-5 border-l border-gray-200"></div>
-        <Sheet>
+        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
               <MenuIcon className="size-6" />
@@ -70,7 +100,7 @@ export const Header = () => {
                   <div className="flex items-center justify-between">
                     <h2 className="font-semibold">Olá, Faça seu login!</h2>
                     <Button size="lg" asChild className="rounded-full">
-                      <Link href="/authentication">
+                      <Link href="/authentication" onClick={handleLinkClick}>
                         Login
                         <LogInIcon />
                       </Link>
@@ -83,10 +113,13 @@ export const Header = () => {
                 <Separator />
               </div>
 
-              {/* Menu Navigation */}
               <div className="space-y-6">
                 <div className="space-y-6 px-5">
-                  <Link href="/" className="flex items-center gap-3 rounded-lg">
+                  <Link
+                    href="/"
+                    className="flex items-center gap-3 rounded-lg"
+                    onClick={handleLinkClick}
+                  >
                     <HomeIcon size={16} />
                     <p className="font-semibold">Início</p>
                   </Link>
@@ -96,6 +129,7 @@ export const Header = () => {
                       <Link
                         href="/my-orders"
                         className="flex items-center gap-3 rounded-lg"
+                        onClick={handleLinkClick}
                       >
                         <PackageIcon size={16} />
                         <p className="font-semibold">Meus Pedidos</p>
@@ -104,6 +138,7 @@ export const Header = () => {
                       <Link
                         href="/cart/identification"
                         className="flex items-center gap-3 rounded-lg"
+                        onClick={handleLinkClick}
                       >
                         <ShoppingCartIcon size={16} />
                         <p className="font-semibold">Carrinho</p>
@@ -116,38 +151,30 @@ export const Header = () => {
                   <Separator />
                 </div>
 
-                <div className="space-y-6 px-6">
+                <div className="space-y-6 px-5">
                   <h3 className="text-muted-foreground mb-5 font-semibold tracking-wider uppercase">
                     Categorias
                   </h3>
-                  <div className="flex flex-col space-y-6 px-2">
-                    <Link href="/category/camisetas">
-                      <p className="font-semibold">Camisetas</p>
-                    </Link>
-
-                    <Link href="/category/bermuda-shorts">
-                      <p className="font-semibold">Bermuda & Shorts</p>
-                    </Link>
-
-                    <Link href="/category/calcas">
-                      <p className="font-semibold">Calças</p>
-                    </Link>
-
-                    <Link href="/category/jaquetas-moletons">
-                      <p className="font-semibold">Jaquetas & Moletons</p>
-                    </Link>
-
-                    <Link href="/category/tenis">
-                      <p className="font-semibold">Tênis</p>
-                    </Link>
-
-                    <Link href="/category/acessorios">
-                      <p className="font-semibold">Acessórios</p>
-                    </Link>
+                  <div className="grid grid-cols-1 gap-3">
+                    {categories.map((category) => (
+                      <Button
+                        key={category.id}
+                        variant="ghost"
+                        className="justify-start text-base font-semibold"
+                        type="button"
+                        asChild
+                      >
+                        <Link
+                          href={`/category/${category.slug}`}
+                          onClick={handleLinkClick}
+                        >
+                          {category.name}
+                        </Link>
+                      </Button>
+                    ))}
                   </div>
                 </div>
 
-                {/* Logout Button */}
                 {session?.user && (
                   <>
                     <div className="px-5">
@@ -157,7 +184,10 @@ export const Header = () => {
                     <div className="px-5">
                       <button
                         className="text-muted-foreground flex w-full items-center gap-2 p-2 font-semibold"
-                        onClick={() => authClient.signOut()}
+                        onClick={() => {
+                          authClient.signOut();
+                          setIsMenuOpen(false);
+                        }}
                       >
                         <LogOutIcon className="h-5 w-5" />
                         <p>Sair da conta</p>

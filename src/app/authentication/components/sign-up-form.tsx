@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -28,20 +29,15 @@ import { authClient } from "@/lib/auth-client";
 
 const formSchema = z
   .object({
-    name: z.string("Nome inválido").trim().min(1, "Nome é obrigatório"),
+    name: z.string().min(1, "Nome é obrigatório."),
     email: z.email("E-mail inválido."),
-    password: z.string().min(8, "A senha precisa ter 8 dígitos."),
-    passwordConfirmation: z.string().min(8, "A senha precisa ter 8 dígitos."),
+    password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres."),
+    passwordConfirmation: z.string(),
   })
-  .refine(
-    (data) => {
-      return data.password == data.passwordConfirmation;
-    },
-    {
-      error: "As senhas não coincidem.",
-      path: ["passwordConfirmation"],
-    },
-  );
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Senhas não coincidem.",
+    path: ["passwordConfirmation"],
+  });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -59,9 +55,9 @@ const SignUpForm = () => {
 
   async function onSubmit(values: FormValues) {
     await authClient.signUp.email({
-      name: values.name,
       email: values.email,
       password: values.password,
+      name: values.name,
       fetchOptions: {
         onSuccess: () => {
           router.push("/");
@@ -150,7 +146,16 @@ const SignUpForm = () => {
               />
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">Criar Conta</Button>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Criar Conta
+              </Button>
             </CardFooter>
           </form>
         </Form>

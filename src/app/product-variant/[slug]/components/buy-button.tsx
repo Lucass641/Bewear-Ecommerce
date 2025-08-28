@@ -1,10 +1,12 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { useCreateNewCart } from "@/hooks/mutations/use-create-new-cart";
+import { useBuyNow } from "@/hooks/mutations/use-buy-now";
 
 interface BuyButtonProps {
   productVariantId: string;
@@ -13,26 +15,34 @@ interface BuyButtonProps {
 
 const BuyButton = ({ productVariantId, quantity }: BuyButtonProps) => {
   const router = useRouter();
+  const buyNowMutation = useBuyNow();
 
-  const createSessionMutation = useCreateNewCart({
-    productVariantId,
-    quantity,
-  });
+  const handleBuyNow = async () => {
+    try {
+      const result = await buyNowMutation.mutateAsync({
+        productVariantId,
+        quantity,
+      });
+
+      if (result?.cartId) {
+        localStorage.setItem("buyNow", "true");
+        localStorage.setItem("temporaryCartId", result.cartId);
+        router.push("/cart/identification");
+      }
+    } catch (error) {
+      toast.error("Erro ao adicionar produto ao carrinho. Tente novamente.");
+      console.error(error);
+    }
+  };
 
   return (
     <Button
       className="rounded-full"
       size="lg"
-      disabled={createSessionMutation.isPending}
-      onClick={() =>
-        createSessionMutation.mutate(undefined, {
-          onSuccess: (session) => {
-            const qs = session?.id ? `?checkoutSessionId=${session.id}` : "";
-            router.push(`/cart/identification${qs}`);
-          },
-        })
-      }
+      disabled={buyNowMutation.isPending}
+      onClick={handleBuyNow}
     >
+      {buyNowMutation.isPending && <Loader2 className="animate-spin" />}
       Comprar agora
     </Button>
   );
