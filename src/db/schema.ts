@@ -137,7 +137,7 @@ export const shippingAddressTable = pgTable("shipping_address", {
   id: uuid().primaryKey().defaultRandom(),
   userId: text("user_id")
     .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    .references(() => userTable.id, { onDelete: "set null" }),
   recipientName: text().notNull(),
   street: text().notNull(),
   number: text().notNull(),
@@ -229,7 +229,6 @@ export const orderTable = pgTable("order", {
     .notNull()
     .references(() => userTable.id, { onDelete: "cascade" }),
   shippingAddressId: uuid("shipping_address_id")
-    .notNull()
     .references(() => shippingAddressTable.id, { onDelete: "set null" }),
   recipientName: text().notNull(),
   street: text().notNull(),
@@ -265,7 +264,7 @@ export const orderItemTable = pgTable("order_item", {
     .references(() => orderTable.id, { onDelete: "cascade" }),
   productVariantId: uuid("product_variant_id")
     .notNull()
-    .references(() => productVariantTable.id, { onDelete: "restrict" }),
+    .references(() => productVariantTable.id, { onDelete: "cascade" }),
   quantity: integer("quantity").notNull(),
   priceInCents: integer("price_in_cents").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
