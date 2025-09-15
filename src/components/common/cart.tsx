@@ -83,17 +83,7 @@ export const Cart = () => {
             <div className="flex flex-col gap-4">
               <Separator />
               <div className="flex items-center justify-between text-xs font-medium">
-                <p>Subtotal</p>
-                <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between text-xs font-medium">
-                <p>Entrega</p>
-                <p>GRÁTIS</p>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between text-xs font-medium">
-                <p>Total</p>
+                <p className="font-semibold">Subtotal</p>
                 <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
               </div>
               <Button

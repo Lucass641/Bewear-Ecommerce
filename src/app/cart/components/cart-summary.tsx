@@ -7,6 +7,8 @@ import { formatCentsToBRL } from "@/helpers/money";
 interface CartSummaryProps {
   subtotalInCents: number;
   totalInCents: number;
+  shippingInCents?: number;
+  hideShipping?: boolean;
   products: Array<{
     id: string;
     name: string;
@@ -20,6 +22,8 @@ interface CartSummaryProps {
 const CartSummary = ({
   subtotalInCents,
   totalInCents,
+  shippingInCents = 0,
+  hideShipping = false,
   products,
 }: CartSummaryProps) => {
   return (
@@ -34,10 +38,16 @@ const CartSummary = ({
             {formatCentsToBRL(subtotalInCents)}{" "}
           </p>
         </div>
-        <div className="flex justify-between">
-          <p className="text-sm">Frete</p>
-          <p className="text-muted-foreground text-sm font-medium">Grátis </p>
-        </div>
+        {!hideShipping && (
+          <div className="flex justify-between">
+            <p className="text-sm">Frete</p>
+            <p className="text-muted-foreground text-sm font-medium">
+              {shippingInCents > 0
+                ? formatCentsToBRL(shippingInCents)
+                : "Grátis"}
+            </p>
+          </div>
+        )}
         <div className="flex justify-between">
           <p className="text-sm">Total</p>
           <p className="text-muted-foreground text-sm font-medium">

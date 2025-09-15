@@ -35,8 +35,6 @@ export interface ShippingAddress {
   zipCode: string;
   country: string;
   phone: string;
-  email: string;
-  cpf: string;
   createdAt: Date;
 }
 

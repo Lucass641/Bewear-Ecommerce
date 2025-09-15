@@ -17,6 +17,7 @@ interface OrdersProps {
     id: string;
     totalPriceInCents: number;
     status: (typeof orderTable.$inferSelect)["status"];
+    trackingCode: string | null;
     createdAt: Date;
     items: Array<{
       id: string;
@@ -30,7 +31,9 @@ interface OrdersProps {
 }
 
 const Orders = ({ orders }: OrdersProps) => {
-  const sortedOrders = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const sortedOrders = [...orders].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 
   return (
     <div className="space-y-4">
@@ -62,6 +65,11 @@ const Orders = ({ orders }: OrdersProps) => {
                         Pedido feito em{" "}
                         {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                       </p>
+                      {order.status === "shipped" && order.trackingCode && (
+                        <p className="text-sm font-medium text-blue-600">
+                          Código de postagem: {order.trackingCode}
+                        </p>
+                      )}
                     </div>
                     <div>
                       {order.status == "pending" && (

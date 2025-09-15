@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 
 import { useCart } from "@/hooks/queries/use-cart";
@@ -13,7 +13,6 @@ import {
   mapCartItemsToSummaryProducts,
 } from "../../utils/cart-utils";
 import Addresses from "./addresses";
-
 
 interface CartIdentificationWrapperProps {
   shippingAddresses: ShippingAddress[];
@@ -69,6 +68,7 @@ const CartIdentificationWrapper = ({
         subtotalInCents={cartTotalInCents}
         totalInCents={cartTotalInCents}
         products={summaryProducts}
+        hideShipping={true}
       />
     </div>
   );

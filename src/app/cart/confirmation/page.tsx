@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 
@@ -31,7 +30,21 @@ const ConfirmationPage = async () => {
     },
   });
 
-  return <CartConfirmationWrapper serverCart={cart} />;
+  if (!cart) {
+    redirect("/");
+  }
+
+  const totalPriceInCents = cart.items.reduce(
+    (total, item) => total + item.productVariant.priceInCents * item.quantity,
+    0
+  );
+
+  const cartWithTotal = {
+    ...cart,
+    totalPriceInCents,
+  };
+
+  return <CartConfirmationWrapper serverCart={cartWithTotal} />;
 };
 
 export default ConfirmationPage;

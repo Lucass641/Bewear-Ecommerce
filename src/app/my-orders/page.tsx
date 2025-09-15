@@ -37,6 +37,7 @@ const MyOrdersPage = async () => {
           id: order.id,
           totalPriceInCents: order.totalPriceInCents,
           status: order.status,
+          trackingCode: order.trackingCode,
           createdAt: order.createdAt,
           items: order.items.map((item) => ({
             id: item.id,

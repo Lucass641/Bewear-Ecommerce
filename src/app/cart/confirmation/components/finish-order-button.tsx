@@ -8,7 +8,11 @@ import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { Button } from "@/components/ui/button";
 import { useFinishOrder } from "@/hooks/mutations/use-finish-order";
 
-const FinishOrderButton = () => {
+interface FinishOrderButtonProps {
+  disabled?: boolean;
+}
+
+const FinishOrderButton = ({ disabled = false }: FinishOrderButtonProps) => {
   const [isBuyNow, setIsBuyNow] = useState(false);
   const [temporaryCartId, setTemporaryCartId] = useState<string | null>(null);
   const finishOrderMutation = useFinishOrder();
@@ -64,7 +68,7 @@ const FinishOrderButton = () => {
         className="w-full rounded-full"
         size="lg"
         onClick={handleFinishOrder}
-        disabled={finishOrderMutation.isPending}
+        disabled={disabled || finishOrderMutation.isPending}
       >
         {finishOrderMutation.isPending && (
           <Loader2 className="h-4 w-4 animate-spin" />
