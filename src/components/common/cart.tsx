@@ -30,7 +30,7 @@ export const Cart = () => {
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon">
-          <ShoppingBag className="size-6" />
+          <ShoppingBag className="size-6 md:size-8" />
         </Button>
       </SheetTrigger>
       <SheetContent>
