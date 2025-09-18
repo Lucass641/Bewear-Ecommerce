@@ -16,6 +16,7 @@ interface CartSummaryProps {
     quantity: number;
     priceInCents: number;
     imageUrl: string;
+    size: string;
   }>;
 }
 
@@ -75,7 +76,12 @@ const CartSummary = ({
                   <p className="text-muted-foreground text-sm">
                     {product.variantName}
                   </p>
-                  <p className="text-xs font-semibold">{product.quantity}</p>
+                  <p className="text-muted-foreground text-xs">
+                    Tamanho: {product.size}
+                  </p>
+                  <p className="text-xs font-semibold">
+                    Qtd: {product.quantity}
+                  </p>
                   <p className="text-sm font-semibold">
                     {formatCentsToBRL(product.priceInCents)}
                   </p>

@@ -6,22 +6,33 @@ import React from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Size } from "@/components/ui/size-selector";
 import { useBuyNow } from "@/hooks/mutations/use-buy-now";
 
 interface BuyButtonProps {
   productVariantId: string;
   quantity: number;
+  size: Size;
+  disabled?: boolean;
 }
 
-const BuyButton = ({ productVariantId, quantity }: BuyButtonProps) => {
+const BuyButton = ({
+  productVariantId,
+  quantity,
+  size,
+  disabled = false,
+}: BuyButtonProps) => {
   const router = useRouter();
   const buyNowMutation = useBuyNow();
 
   const handleBuyNow = async () => {
+    if (!size) return;
+
     try {
       const result = await buyNowMutation.mutateAsync({
         productVariantId,
         quantity,
+        size,
       });
 
       if (result?.cartId) {
@@ -37,9 +48,9 @@ const BuyButton = ({ productVariantId, quantity }: BuyButtonProps) => {
 
   return (
     <Button
-      className="rounded-full"
+      className="w-full rounded-full lg:flex-1"
       size="lg"
-      disabled={buyNowMutation.isPending}
+      disabled={disabled || buyNowMutation.isPending}
       onClick={handleBuyNow}
     >
       {buyNowMutation.isPending && <Loader2 className="animate-spin" />}

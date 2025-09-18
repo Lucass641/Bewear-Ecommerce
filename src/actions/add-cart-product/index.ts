@@ -63,6 +63,7 @@ export const addProductToCart = async (data: AddProductToCartSchema) => {
       and(
         eq(cartItem.cartId, cartId),
         eq(cartItem.productVariantId, data.productVariantId),
+        eq(cartItem.size, data.size),
       ),
   });
   if (cartItem) {
@@ -78,6 +79,7 @@ export const addProductToCart = async (data: AddProductToCartSchema) => {
     cartId,
     productVariantId: data.productVariantId,
     quantity: data.quantity,
+    size: data.size,
   });
 
   return { cartId };

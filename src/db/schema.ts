@@ -166,6 +166,19 @@ export const shippingAddressRelations = relations(
   }),
 );
 
+export const sizeEnum = pgEnum("size", [
+  "P",
+  "M",
+  "G",
+  "GG",
+  "ÚNICO",
+  "37",
+  "38",
+  "39",
+  "40",
+  "41",
+]);
+
 export const cartTable = pgTable("cart", {
   id: uuid().primaryKey().defaultRandom(),
   userId: text("user_id")
@@ -199,6 +212,7 @@ export const cartItemTable = pgTable("cart_item", {
   productVariantId: uuid("product_variant_id")
     .notNull()
     .references(() => productVariantTable.id, { onDelete: "cascade" }),
+  size: sizeEnum("size").notNull(),
   quantity: integer("quantity").notNull().default(1),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -228,8 +242,10 @@ export const orderTable = pgTable("order", {
   userId: text("user_id")
     .notNull()
     .references(() => userTable.id, { onDelete: "cascade" }),
-  shippingAddressId: uuid("shipping_address_id")
-    .references(() => shippingAddressTable.id, { onDelete: "set null" }),
+  shippingAddressId: uuid("shipping_address_id").references(
+    () => shippingAddressTable.id,
+    { onDelete: "set null" },
+  ),
   recipientName: text().notNull(),
   street: text().notNull(),
   number: text().notNull(),
@@ -266,6 +282,7 @@ export const orderItemTable = pgTable("order_item", {
   productVariantId: uuid("product_variant_id")
     .notNull()
     .references(() => productVariantTable.id, { onDelete: "cascade" }),
+  size: sizeEnum("size").notNull(),
   quantity: integer("quantity").notNull(),
   priceInCents: integer("price_in_cents").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

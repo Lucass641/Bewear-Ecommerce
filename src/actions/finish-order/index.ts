@@ -96,6 +96,7 @@ export const finishOrder = async (
         productVariantId: item.productVariant.id,
         quantity: item.quantity,
         priceInCents: item.productVariant.priceInCents,
+        size: item.size,
       }));
     await tx.insert(orderItemTable).values(orderItemsPayload);
     if (clearCartAfterOrder) {

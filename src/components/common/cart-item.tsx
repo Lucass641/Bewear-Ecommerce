@@ -1,10 +1,10 @@
-import {  MinusIcon, PlusIcon, Trash2 } from "lucide-react";
+import { MinusIcon, PlusIcon, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
 import { formatCentsToBRL } from "@/helpers/money";
 import { useDecreaseCartProduct } from "@/hooks/mutations/use-decrease-cart-product";
-import { useIncreaseCartProduct } from "@/hooks/mutations/use-increase-cart-product";
+import { useIncreaseCartItem } from "@/hooks/mutations/use-increase-cart-item";
 import { useRemoveProductFromCart } from "@/hooks/mutations/use-remove-product-from-cart";
 
 import { Button } from "../ui/button";
@@ -17,6 +17,7 @@ interface CartItemProps {
   productVariantImageUrl: string;
   productVariantPriceInCents: number;
   quantity: number;
+  size: string;
 }
 
 const CartItem = ({
@@ -27,11 +28,11 @@ const CartItem = ({
   productVariantImageUrl,
   productVariantPriceInCents,
   quantity,
+  size,
 }: CartItemProps) => {
   const removeProductFromCartMutation = useRemoveProductFromCart(id);
   const decreaseCartProductQuantityMutation = useDecreaseCartProduct(id);
-  const increaseCartProductQuantityMutation =
-    useIncreaseCartProduct(productVariantId);
+  const increaseCartItemQuantityMutation = useIncreaseCartItem(id);
 
   const handleDeleteClick = () => {
     removeProductFromCartMutation.mutate(undefined, {
@@ -49,7 +50,7 @@ const CartItem = ({
   };
 
   const handleIncreaseQuantityClick = () => {
-    increaseCartProductQuantityMutation.mutate();
+    increaseCartItemQuantityMutation.mutate();
   };
 
   const totalPriceInCents = productVariantPriceInCents * quantity;
@@ -67,6 +68,7 @@ const CartItem = ({
         <div className="flex flex-col gap-1">
           <p className="text-sm font-semibold">{productName}</p>
           <p className="text-muted-foreground text-sm">{productVariantName}</p>
+          <p className="text-muted-foreground text-xs">Tamanho: {size}</p>
           <div className="flex w-[100px] items-center justify-between rounded-lg border p-1">
             <Button
               className="h-4 w-4"

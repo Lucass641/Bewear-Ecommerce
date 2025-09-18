@@ -14,6 +14,7 @@ interface OrderSummaryProps {
     variantName: string;
     quantity: number;
     priceInCents: number;
+    size: string;
   }[];
 }
 
@@ -25,7 +26,9 @@ const OrderSummary = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Resumo do Pedido</CardTitle>
+        <CardTitle className="text-lg font-semibold">
+          Resumo do Pedido
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="space-y-4">
@@ -43,10 +46,18 @@ const OrderSummary = ({
                   <div className="mx-2 flex flex-col">
                     <p className="font-semibold">{product.name}</p>
                     <p className="text-muted-foreground text-sm">
-                      {product.variantName} x {product.quantity}
+                      {product.variantName}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Tamanho: {product.size}
+                    </p>
+                    <p className="text-xs font-semibold">
+                      Qtd: {product.quantity}
                     </p>
                     <p className="text-sm font-semibold">
-                      {formatCentsToBRL(product.priceInCents * product.quantity)}
+                      {formatCentsToBRL(
+                        product.priceInCents * product.quantity,
+                      )}
                     </p>
                   </div>
                 </div>

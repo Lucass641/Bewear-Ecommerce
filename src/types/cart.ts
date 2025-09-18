@@ -3,6 +3,7 @@ export interface CartItem {
   cartId: string;
   productVariantId: string;
   quantity: number;
+  size: string;
   createdAt: Date;
   productVariant: {
     id: string;
@@ -56,4 +57,5 @@ export interface CartSummaryProduct {
   quantity: number;
   priceInCents: number;
   imageUrl: string;
+  size: string;
 }

@@ -21,6 +21,7 @@ export const mapCartItemsToSummaryProducts = (
     quantity: item.quantity,
     priceInCents: item.productVariant.priceInCents,
     imageUrl: item.productVariant.imageUrl,
+    size: item.size,
   }));
 };
 

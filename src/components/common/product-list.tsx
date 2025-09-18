@@ -74,7 +74,7 @@ const ProductList = ({ title, products }: ProductListProps) => {
           {products.map((product) => (
             <div
               key={product.id}
-              className="w-[150px] flex-shrink-0 md:w-[300px]"
+              className="w-[150px] flex-shrink-0 md:w-[200px] xl:w-[300px] 2xl:w-[300px]"
             >
               <ProductItem product={product} />
             </div>
@@ -84,7 +84,7 @@ const ProductList = ({ title, products }: ProductListProps) => {
         {canScrollLeft && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 z-10 hidden -translate-x-4 -translate-y-1/2 rounded-full bg-white/95 p-3 shadow-md backdrop-blur-sm transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-lg md:block"
+            className="absolute top-1/2 left-0 z-10 hidden -translate-x-4 -translate-y-1/2 rounded-full bg-white/95 p-3 shadow-md backdrop-blur-sm transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-lg md:block"
           >
             <ChevronLeft className="h-5 w-5 text-gray-700" />
           </button>
@@ -93,7 +93,7 @@ const ProductList = ({ title, products }: ProductListProps) => {
         {canScrollRight && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 z-10 hidden translate-x-4 -translate-y-1/2 rounded-full bg-white/95 p-3 shadow-md backdrop-blur-sm transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-lg md:block"
+            className="absolute top-1/2 right-0 z-10 hidden translate-x-4 -translate-y-1/2 rounded-full bg-white/95 p-3 shadow-md backdrop-blur-sm transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-lg md:block"
           >
             <ChevronRight className="h-5 w-5 text-gray-700" />
           </button>

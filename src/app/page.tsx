@@ -20,9 +20,9 @@ const Home = async () => {
   });
 
   return (
-    <div className="md:mx-10 mx-auto max-w-full space-y-6 md:space-y-12">
+    <div className="mx-auto max-w-[1920px] space-y-6 px-5 md:space-y-12 md:px-10 xl:px-16 2xl:px-20">
       {/* Hero Banner Section */}
-      <div className="px-5">
+      <div>
         <div>
           {/* Mobile Banner */}
           <div className="md:hidden">
@@ -47,19 +47,19 @@ const Home = async () => {
                 height={100}
                 width={100}
                 sizes="100vw"
-                className=" h-auto w-full rounded-lg object-contain"
+                className="h-auto w-full rounded-lg object-contain"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-5">
+      <div>
         <ProductList products={products} title="Mais vendidos" />
       </div>
 
       {/* Additional banners section */}
-      <div className="px-5">
+      <div>
         <div>
           {/* Mobile: Single banner */}
           <div className="md:hidden">
@@ -74,9 +74,9 @@ const Home = async () => {
               />
             </div>
           </div>
-    
-          <div className="hidden md:flex md:items-center md:justify-center md:gap-6 w-full">
-            <div className="flex flex-col items-center justify-center space-y-12 flex-3">
+
+          <div className="hidden w-full md:flex md:justify-between md:gap-7">
+            <div className="flex flex-3 flex-col items-center justify-between py-10">
               <Image
                 src="/banner-05.png"
                 alt="Nike Therma FIT Headed"
@@ -96,21 +96,21 @@ const Home = async () => {
               />
             </div>
 
-            <div className="flex items-center justify-center flex-5">
+            <div className="flex flex-5 items-center justify-center">
               <Image
                 src="/banner-04.png"
                 alt="Nike Therma FIT Headed"
                 height={0}
                 width={0}
                 sizes="100vw"
-                className="h-auto max-h-full w-full rounded-lg object-contain"
+                className="my-10 h-auto w-full rounded-lg object-contain"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-5">
+      <div>
         <ProductList products={newlyCreatedProduct} title="Novos produtos" />
       </div>
     </div>

@@ -8,7 +8,6 @@ import { productTable, productVariantTable } from "@/db/schema";
 import { formatCentsToBRL } from "@/helpers/money";
 
 import ProductActions from "./components/product-actions";
-import VariantSelector from "./components/variant-selector";
 
 interface ProductVariantPageProps {
   params: Promise<{ slug: string }>;
@@ -22,6 +21,7 @@ const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
       product: {
         with: {
           variants: true,
+          category: true,
         },
       },
     },
@@ -37,38 +37,47 @@ const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
   });
 
   return (
-    <div className="flex flex-col space-y-6">
-      <Image
-        src={productVariant.imageUrl}
-        alt={productVariant.name}
-        sizes="100vw"
-        width={0}
-        height={0}
-        className="object h-auto w-full rounded-4xl bg-cover p-4"
-      />
-      <div className="px-5">
-        <VariantSelector
-          selectedVariantSlug={productVariant.slug}
-          variants={productVariant.product.variants}
-        />
+    <div className="container mx-auto px-4 md:px-8 lg:px-16">
+      <div className="flex flex-col lg:flex-row lg:gap-8 lg:py-8">
+        <div className="lg:w-1/2">
+          <Image
+            src={productVariant.imageUrl}
+            alt={productVariant.name}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            width={0}
+            height={0}
+            className="h-auto w-full rounded-lg object-cover"
+          />
+        </div>
+
+        <div className="flex flex-col space-y-6 py-6 lg:w-1/2 lg:py-0">
+          <div className="space-y-2">
+            <h1 className="text-xl font-bold lg:text-2xl">
+              {productVariant.product.name}
+            </h1>
+            <h2 className="text-muted-foreground text-sm lg:text-base">
+              {productVariant.name}
+            </h2>
+            <p className="text-xl font-bold lg:text-2xl">
+              {formatCentsToBRL(productVariant.priceInCents)}
+            </p>
+          </div>
+
+          <ProductActions
+            productVariantId={productVariant.id}
+            isAccessory={productVariant.product.category.slug === "acessrios"}
+            isShoe={productVariant.product.category.slug === "tnis"}
+          />
+
+          <div>
+            <p className="text-muted-foreground text-sm leading-relaxed lg:text-base">
+              {productVariant.product.description}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="px-5">
-        <h2 className="text-lg font-semibold">{productVariant.product.name}</h2>
-        <h3 className="text-muted-foreground text-sm">{productVariant.name}</h3>
-        <h3 className="text-lg font-semibold">
-          {formatCentsToBRL(productVariant.priceInCents)}
-        </h3>
-      </div>
-
-      <ProductActions productVariantId={productVariant.id} />
-
-      <div className="px-5">
-        {/* DESCRIÇÃO */}
-        <p className="text-sm">{productVariant.product.description}</p>
-      </div>
-
-      <div>
+      <div className="py-8">
         <ProductList
           title="Você também pode gostar"
           products={likelyProducts}

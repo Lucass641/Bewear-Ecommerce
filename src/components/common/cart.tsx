@@ -22,6 +22,9 @@ export const Cart = () => {
   const { data: cart, isPending } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const totalItems =
+    cart?.items?.reduce((total, item) => total + item.quantity, 0) ?? 0;
+
   const handleContinueClick = () => {
     setIsCartOpen(false);
   };
@@ -29,8 +32,13 @@ export const Cart = () => {
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="relative">
           <ShoppingBag className="size-6 md:size-8" />
+          {totalItems > 0 && (
+            <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold">
+              {totalItems}
+            </span>
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent>
@@ -61,6 +69,7 @@ export const Cart = () => {
                         item.productVariant.priceInCents
                       }
                       quantity={item.quantity}
+                      size={item.size}
                     />
                   ))
                 ) : (
