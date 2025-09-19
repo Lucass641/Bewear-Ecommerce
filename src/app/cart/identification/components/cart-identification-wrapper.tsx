@@ -1,6 +1,9 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { CheckoutStepper } from "@/components/common/checkout-stepper";
+import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/queries/use-cart";
 import { useTemporaryCart } from "@/hooks/queries/use-temporary-cart";
 import { Cart, ShippingAddress } from "@/types/cart";
@@ -58,18 +61,49 @@ const CartIdentificationWrapper = ({
   const cartTotalInCents = calculateCartTotal(activeCart);
   const summaryProducts = mapCartItemsToSummaryProducts(activeCart);
 
+  const steps = [
+    { id: "cart", title: "Sacola", status: "completed" as const },
+    {
+      id: "identification",
+      title: "Identificação",
+      status: "current" as const,
+    },
+    { id: "payment", title: "Pagamento", status: "upcoming" as const },
+  ];
+
   return (
-    <div className="space-y-4 px-5">
-      <Addresses
-        shippingAddresses={shippingAddresses}
-        defaultShippingAddressId={activeCart?.shippingAddress?.id || null}
-      />
-      <CartSummary
-        subtotalInCents={cartTotalInCents}
-        totalInCents={cartTotalInCents}
-        products={summaryProducts}
-        hideShipping={true}
-      />
+    <div className="mx-auto max-w-7xl">
+      {/* Stepper at the top for all screens */}
+      <div className="mb-6 px-5">
+        <CheckoutStepper steps={steps} />
+      </div>
+
+      <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:px-5">
+        <div className="lg:col-span-2">
+          <div className="px-5 lg:px-0">
+            <Addresses
+              shippingAddresses={shippingAddresses}
+              defaultShippingAddressId={activeCart?.shippingAddress?.id || null}
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 lg:mt-0">
+          <div className="px-5 lg:px-0">
+            <CartSummary
+              subtotalInCents={cartTotalInCents}
+              totalInCents={cartTotalInCents}
+              products={summaryProducts}
+              hideShipping={true}
+            />
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" asChild>
+                <Link href="/">Continuar comprando</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

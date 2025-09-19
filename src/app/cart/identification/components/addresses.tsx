@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Plus, Trash2Icon } from "lucide-react";
+import { IdCard, Loader2, Plus, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -98,7 +98,10 @@ const Addresses = ({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Identificação</CardTitle>
+          <CardTitle className="flex items-center gap-2 font-semibold md:text-xl">
+            <IdCard />
+            Identificação
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isPending ? (
@@ -119,21 +122,22 @@ const Addresses = ({
               )}
 
               {addresses?.map((address) => (
-                <Card key={address.id}>
-                  <CardContent>
-                    <div className="flex items-center justify-between space-x-2">
-                      <div className="flex flex-1 items-center space-x-2">
+                <Card
+                  key={address.id}
+                  className="hover:bg-muted/50 transition-colors"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between space-x-3">
+                      <div className="flex flex-1 items-center space-x-3">
                         <RadioGroupItem value={address.id} id={address.id} />
-                        <div className="flex-1">
+                        <div className="min-w-0 flex-1">
                           <Label
                             htmlFor={address.id}
-                            className="cursor-pointer"
+                            className="block cursor-pointer"
                           >
-                            <div>
-                              <p className="text-sm whitespace-pre-line">
-                                {formatAddress(address)}
-                              </p>
-                            </div>
+                            <p className="text-sm leading-relaxed break-words whitespace-pre-line">
+                              {formatAddress(address)}
+                            </p>
                           </Label>
                         </div>
                       </div>
@@ -142,7 +146,7 @@ const Addresses = ({
                         size="icon"
                         onClick={() => handleDeleteAddress(address.id)}
                         disabled={deleteShippingAddressMutation.isPending}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive shrink-0"
                       >
                         <Trash2Icon className="h-4 w-4" />
                       </Button>
@@ -177,13 +181,16 @@ const Addresses = ({
           )}
 
           {selectedAddress && (
-            <div className="mt-4">
+            <div className="mt-6">
               <Button
                 onClick={handleConfirmOrder}
                 className="w-full rounded-full"
                 disabled={isConfirmOrderLoading}
+                size="lg"
               >
-                {isConfirmOrderLoading && <Loader2 className="animate-spin" />}
+                {isConfirmOrderLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {isConfirmOrderLoading ? "Processando..." : "Confirmar pedido"}
               </Button>
             </div>

@@ -1,9 +1,12 @@
 "use client";
 
 import { IdCard } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { CheckoutStepper } from "@/components/common/checkout-stepper";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCart } from "@/hooks/queries/use-cart";
 import { useTemporaryCart } from "@/hooks/queries/use-temporary-cart";
@@ -99,40 +102,75 @@ const CartConfirmationWrapper = ({}: CartConfirmationWrapperProps) => {
   const totalWithShipping = cartTotalInCents + shippingInCents;
   const summaryProducts = mapCartItemsToSummaryProducts(activeCart);
 
+  const steps = [
+    { id: "cart", title: "Sacola", status: "completed" as const },
+    {
+      id: "identification",
+      title: "Identificação",
+      status: "completed" as const,
+    },
+    { id: "payment", title: "Pagamento", status: "current" as const },
+  ];
+
   if (!activeCart.shippingAddress) {
     router.push("/cart/identification");
     return null;
   }
 
   return (
-    <div className="space-y-6 px-5">
-      <Card>
-        <CardHeader className="flex items-center gap-2">
-          <IdCard />
-          <CardTitle>Identificação</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ShippingAddressCard shippingAddress={activeCart.shippingAddress} />
-        </CardContent>
+    <div className="mx-auto max-w-7xl">
+      {/* Stepper at the top for all screens */}
+      <div className="mb-6 px-5">
+        <CheckoutStepper steps={steps} />
+      </div>
 
-        <CardContent className="pt-2">
-          <ShippingOptions
-            cart={activeCart}
-            onShippingSelect={handleShippingSelect}
-          />
-        </CardContent>
+      <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:px-5">
+        <div className="lg:col-span-2">
+          <div className="px-5 lg:px-0">
+            <Card>
+              <CardHeader className="flex items-center gap-2">
+                <IdCard />
+                <CardTitle className="font-semibold md:text-xl">
+                  Identificação
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ShippingAddressCard
+                  shippingAddress={activeCart.shippingAddress}
+                />
+              </CardContent>
 
-        <CardContent className="pt-2">
-          <FinishOrderButton disabled={!selectedShipping} />
-        </CardContent>
-      </Card>
+              <CardContent className="pt-2">
+                <ShippingOptions
+                  cart={activeCart}
+                  onShippingSelect={handleShippingSelect}
+                />
+              </CardContent>
 
-      <CartSummary
-        subtotalInCents={cartTotalInCents}
-        totalInCents={totalWithShipping}
-        shippingInCents={shippingInCents}
-        products={summaryProducts}
-      />
+              <CardContent className="pt-2">
+                <FinishOrderButton disabled={!selectedShipping} />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="mt-6 lg:mt-0">
+          <div className="px-5 lg:px-0">
+            <CartSummary
+              subtotalInCents={cartTotalInCents}
+              totalInCents={totalWithShipping}
+              shippingInCents={shippingInCents}
+              products={summaryProducts}
+            />
+
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" asChild>
+                <Link href="/">Continuar comprando</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

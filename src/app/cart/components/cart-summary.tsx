@@ -30,7 +30,7 @@ const CartSummary = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Resumo</CardTitle>
+        <CardTitle className="md:text-xl font-semibold">Resumo</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex justify-between">
@@ -50,8 +50,8 @@ const CartSummary = ({
           </div>
         )}
         <div className="flex justify-between">
-          <p className="text-sm">Total</p>
-          <p className="text-muted-foreground text-sm font-medium">
+          <p className="text-sm font-semibold">Total</p>
+          <p className="text-sm font-semibold">
             {formatCentsToBRL(totalInCents)}{" "}
           </p>
         </div>

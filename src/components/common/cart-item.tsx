@@ -23,7 +23,6 @@ interface CartItemProps {
 const CartItem = ({
   id,
   productName,
-  productVariantId,
   productVariantName,
   productVariantImageUrl,
   productVariantPriceInCents,

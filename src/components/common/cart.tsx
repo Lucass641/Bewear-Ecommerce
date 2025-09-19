@@ -45,7 +45,8 @@ export const Cart = () => {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             {" "}
-            <ShoppingBagIcon className="size-5 opacity-70" /> Sacola
+            <ShoppingBagIcon className="size-5 opacity-70 md:size-6" />{" "}
+            <p className="font-semibold md:text-xl">Sacola</p>
           </SheetTitle>
         </SheetHeader>
         <div className="flex h-full flex-col px-5 pb-5">
@@ -92,19 +93,30 @@ export const Cart = () => {
             <div className="flex flex-col gap-4">
               <Separator />
               <div className="flex items-center justify-between text-xs font-medium">
-                <p className="font-semibold">Subtotal</p>
+                <p className="font-semibold md:text-sm">Subtotal</p>
                 <p>{formatCentsToBRL(cart?.totalPriceInCents ?? 0)}</p>
               </div>
-              <Button
-                className="mt-5 rounded-full"
-                asChild
-                disabled={isPending}
-              >
-                <Link href="/cart/identification" onClick={handleContinueClick}>
-                  {isPending && <Loader2 className="mr-2 animate-spin" />}
-                  Continuar
-                </Link>
-              </Button>
+              <div className="mt-5 flex flex-col gap-3">
+                <Button className="rounded-full" asChild disabled={isPending}>
+                  <Link
+                    href="/cart/identification"
+                    onClick={handleContinueClick}
+                  >
+                    {isPending && <Loader2 className="mr-2 animate-spin" />}
+                    Finalizar compra
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full"
+                  asChild
+                  disabled={isPending}
+                >
+                  <Link href="/" onClick={handleContinueClick}>
+                    Continuar comprando
+                  </Link>
+                </Button>
+              </div>
             </div>
           )}
         </div>
