@@ -329,7 +329,7 @@ export const Header = () => {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="text-muted-foreground text-lg font-semibold transition-colors hover:text-gray-900"
+                className="text-muted-foreground text-base font-semibold transition-colors hover:text-primary"
               >
                 {category.name}
               </Link>
