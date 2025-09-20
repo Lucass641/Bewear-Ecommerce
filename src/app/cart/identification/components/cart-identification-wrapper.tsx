@@ -6,7 +6,7 @@ import { CheckoutStepper } from "@/components/common/checkout-stepper";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/queries/use-cart";
 import { useTemporaryCart } from "@/hooks/queries/use-temporary-cart";
-import { Cart, ShippingAddress } from "@/types/cart";
+import { ShippingAddress } from "@/types/cart";
 
 import CartSummary from "../../components/cart-summary";
 import { EmptyCartState } from "../../components/empty-cart-state";
@@ -20,7 +20,6 @@ import Addresses from "./addresses";
 interface CartIdentificationWrapperProps {
   shippingAddresses: ShippingAddress[];
   defaultShippingAddressId: string | null;
-  serverCart: Cart | null;
 }
 
 const useCartState = () => {

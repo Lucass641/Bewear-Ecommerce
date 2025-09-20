@@ -14,8 +14,6 @@ const DEFAULT_PRODUCT_DIMENSIONS = {
   length: 30,
 };
 
-const DEFAULT_PRODUCT_WEIGHT = 0.5;
-
 export interface ShippingOption {
   id: "pac" | "sedex";
   name: string;

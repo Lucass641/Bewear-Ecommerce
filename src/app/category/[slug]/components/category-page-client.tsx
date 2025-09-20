@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import ProductItem from "@/components/common/product-item";
 
-import CategoryHeader from "./category-header";
-import FilterSidebar from "./filter-sidebar";
 import { CategoryFilters } from "../types/filters";
 import {
   filterProducts,
-  sortProducts,
-  getUniqueColors,
   getAvailableSizes,
+  getUniqueColors,
   ProductWithVariants,
+  sortProducts,
 } from "../utils/filter-utils";
+import CategoryHeader from "./category-header";
+import FilterSidebar from "./filter-sidebar";
 
 interface CategoryPageClientProps {
   category: {

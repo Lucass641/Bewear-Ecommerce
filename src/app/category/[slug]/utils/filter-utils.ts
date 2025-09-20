@@ -2,7 +2,6 @@ import {
   CategoryFilters,
   FilterOption,
   getCategoryType,
-  CategoryType,
 } from "../types/filters";
 
 export interface ProductWithVariants {

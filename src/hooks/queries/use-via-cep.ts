@@ -7,14 +7,6 @@ interface ViaCepResponse {
   bairro: string;
   localidade: string;
   uf: string;
-  ibge: string;
-  gia: string;
-  ddd: string;
-  siafi: string;
-}
-
-interface ViaCepError {
-  erro: boolean;
 }
 
 export const viaCepQueryKey = (zipCode: string) => ["via-cep", zipCode];

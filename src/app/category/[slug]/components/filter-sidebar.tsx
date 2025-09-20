@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { CategoryFilters, FilterOption } from "../types/filters";
 import ColorFilter from "./color-filter";
 import SearchFilter from "./search-filter";
 import SizeFilter from "./size-filter";
 import SortFilter from "./sort-filter";
-import { CategoryFilters, FilterOption } from "../types/filters";
 
 interface FilterSidebarProps {
   filters: CategoryFilters;

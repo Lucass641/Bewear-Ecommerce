@@ -64,6 +64,7 @@ export const createCheckoutSession = async (
         product_data: {
           name: "Frete",
           description: "Taxa de entrega",
+          images: [],
         },
         unit_amount: order.shippingPriceInCents,
       },

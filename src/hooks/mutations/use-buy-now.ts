@@ -34,6 +34,8 @@ export const useBuyNow = () => {
       });
       return result;
     },
-    onSuccess: () => {},
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getUseCartQueryKey() });
+    },
   });
 };

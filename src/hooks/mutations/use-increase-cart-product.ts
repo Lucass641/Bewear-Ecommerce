@@ -7,7 +7,10 @@ import { getUseCartQueryKey } from "../queries/use-cart";
 export const getIncreaseCartProductMutationKey = (productVariantId: string) =>
   ["increase-cart-product-quantity", productVariantId] as const;
 
-export const useIncreaseCartProduct = (productVariantId: string) => {
+export const useIncreaseCartProduct = (
+  productVariantId: string,
+  size: "P" | "M" | "G" | "GG" | "ÚNICO" | "37" | "38" | "39" | "40" | "41",
+) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: getIncreaseCartProductMutationKey(productVariantId),
@@ -15,6 +18,7 @@ export const useIncreaseCartProduct = (productVariantId: string) => {
       addProductToCart({
         productVariantId,
         quantity: 1,
+        size,
         clearCart: false,
         createTemporaryCart: false,
       }),

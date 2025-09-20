@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignInForm from "./components/sign-in-form";
 import SignUpForm from "./components/sign-up-form";
 
-export function Authentication() {
+export default function Authentication() {
   return (
     <div className="mx-auto max-w-[1920px] px-5 py-10 md:px-10 xl:px-16 2xl:px-20">
       <div className="flex min-h-[600px] lg:gap-8 xl:gap-12">
@@ -60,5 +60,3 @@ export function Authentication() {
     </div>
   );
 }
-
-export default Authentication;

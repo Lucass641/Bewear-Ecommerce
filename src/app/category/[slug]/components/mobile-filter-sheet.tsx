@@ -12,11 +12,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+import { CategoryFilters, FilterOption } from "../types/filters";
 import ColorFilter from "./color-filter";
 import SearchFilter from "./search-filter";
 import SizeFilter from "./size-filter";
 import SortFilter from "./sort-filter";
-import { CategoryFilters, FilterOption } from "../types/filters";
 
 interface MobileFilterSheetProps {
   filters: CategoryFilters;

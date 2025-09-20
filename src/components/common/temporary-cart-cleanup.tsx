@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 import { useClearTemporaryCart } from "@/hooks/mutations/use-clear-temporary-cart";
 

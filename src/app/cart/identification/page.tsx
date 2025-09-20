@@ -42,7 +42,6 @@ const IdentificationPage = async () => {
     <CartIdentificationWrapper
       shippingAddresses={shippingAddresses}
       defaultShippingAddressId={cart?.shippingAddress?.id || null}
-      serverCart={cart}
     />
   );
 };

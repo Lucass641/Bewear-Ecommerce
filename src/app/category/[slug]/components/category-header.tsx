@@ -1,7 +1,7 @@
 "use client";
 
-import MobileFilterSheet from "./mobile-filter-sheet";
 import { CategoryFilters, FilterOption } from "../types/filters";
+import MobileFilterSheet from "./mobile-filter-sheet";
 
 interface CategoryHeaderProps {
   categoryName: string;
