@@ -257,6 +257,7 @@ export const orderTable = pgTable("order", {
   country: text().notNull(),
   phone: text().notNull(),
   totalPriceInCents: integer("total_price_in_cents").notNull(),
+  shippingPriceInCents: integer("shipping_price_in_cents").notNull().default(0),
   status: orderStatus().notNull().default("pending"),
   trackingCode: text("tracking_code"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

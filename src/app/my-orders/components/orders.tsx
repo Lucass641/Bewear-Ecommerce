@@ -17,6 +17,7 @@ interface OrdersProps {
   orders: Array<{
     id: string;
     totalPriceInCents: number;
+    shippingPriceInCents: number;
     status: (typeof orderTable.$inferSelect)["status"];
     trackingCode: string | null;
     createdAt: Date;
@@ -108,7 +109,7 @@ const Orders = ({ orders }: OrdersProps) => {
           <Card key={order.id} className="overflow-hidden">
             {/* Desktop Header */}
             <div className="hidden lg:block">
-              <div className="grid grid-cols-4 gap-4 px-6">
+              <div className="grid grid-cols-5 gap-4 px-6">
                 <div>
                   <p className="mb-1 text-sm font-semibold">Número do Pedido</p>
                   <p className="text-muted-foreground">
@@ -125,11 +126,11 @@ const Orders = ({ orders }: OrdersProps) => {
                     {new Date(order.createdAt).toLocaleDateString("pt-BR")}
                   </p>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="mb-1 text-sm font-semibold">Pagamento</p>
-                    <p className="text-muted-foreground">Cartão</p>
-                  </div>
+                <div>
+                  <p className="mb-1 text-sm font-semibold">Pagamento</p>
+                  <p className="text-muted-foreground">Cartão</p>
+                </div>
+                <div className="flex items-center justify-end">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -154,46 +155,36 @@ const Orders = ({ orders }: OrdersProps) => {
 
             {/* Mobile Header */}
             <div className="px-4 lg:hidden lg:px-4">
-              <div className="space-y-3">
-                {/* Data e Pagamento */}
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="font-semibold">Data</p>
-                    <p className="text-muted-foreground">
-                      {new Date(order.createdAt).toLocaleDateString("pt-BR")}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">Pagamento</p>
-                    <p className="text-muted-foreground">Cartão</p>
-                  </div>
+              <div className="flex items-center justify-between">
+                <div className="text-center">
+                  <p className="mb-1 font-semibold">Pedido</p>
+                  <p className="text-muted-foreground text-sm">
+                    #{getOrderNumber(order.id).toString().padStart(5, "0")}
+                  </p>
                 </div>
-
-                {/* Pedido e Status */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="flex items-center gap-2 font-semibold">
-                      Pedido{" "}
-                      <p className="text-muted-foreground text-sm font-normal md:text-base">
-                        #{getOrderNumber(order.id).toString().padStart(3, "0")}
-                      </p>
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(order.status)}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleOrder(order.id)}
-                      className="text-primary h-auto p-1"
-                    >
-                      {isExpanded ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                <div className="text-center">
+                  <p className="mb-1 font-semibold">Data</p>
+                  <p className="text-muted-foreground text-sm">
+                    {new Date(order.createdAt).toLocaleDateString("pt-BR")}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="mb-1 font-semibold">Status</p>
+                  {getStatusBadge(order.status)}
+                </div>
+                <div className="flex items-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleOrder(order.id)}
+                    className="text-primary h-auto p-1"
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -244,16 +235,25 @@ const Orders = ({ orders }: OrdersProps) => {
                   {/* Order Summary */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
+                      <span>Método de Pagamento</span>
+                      <span>Cartão</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>{formatCentsToBRL(order.totalPriceInCents)}</span>
+                      <span>
+                        {formatCentsToBRL(
+                          order.totalPriceInCents - order.shippingPriceInCents,
+                        )}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Transporte e Manuseio</span>
-                      <span>Grátis</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Taxa Estimada</span>
-                      <span>—</span>
+                      <span>Frete</span>
+                      <span>
+                        {order.shippingPriceInCents === 0
+                          ? "Grátis"
+                          : formatCentsToBRL(order.shippingPriceInCents)}
+                      </span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-semibold">

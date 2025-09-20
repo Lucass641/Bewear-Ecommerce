@@ -42,6 +42,35 @@ export const createCheckoutSession = async (
     },
   });
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const lineItems = orderItems.map((orderItem) => {
+    return {
+      price_data: {
+        currency: "brl",
+        product_data: {
+          name: `${orderItem.productVariant.product.name} - ${orderItem.productVariant.name}`,
+          description: orderItem.productVariant.product.description,
+          images: [orderItem.productVariant.imageUrl],
+        },
+        unit_amount: orderItem.priceInCents,
+      },
+      quantity: orderItem.quantity,
+    };
+  });
+
+  if (order.shippingPriceInCents > 0) {
+    lineItems.push({
+      price_data: {
+        currency: "brl",
+        product_data: {
+          name: "Frete",
+          description: "Taxa de entrega",
+        },
+        unit_amount: order.shippingPriceInCents,
+      },
+      quantity: 1,
+    });
+  }
+
   const checkoutSession = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
@@ -50,20 +79,7 @@ export const createCheckoutSession = async (
     metadata: {
       orderId,
     },
-    line_items: orderItems.map((orderItem) => {
-      return {
-        price_data: {
-          currency: "brl",
-          product_data: {
-            name: `${orderItem.productVariant.product.name} - ${orderItem.productVariant.name}`,
-            description: orderItem.productVariant.product.description,
-            images: [orderItem.productVariant.imageUrl],
-          },
-          unit_amount: orderItem.priceInCents,
-        },
-        quantity: orderItem.quantity,
-      };
-    }),
+    line_items: lineItems,
   });
   return checkoutSession;
 };

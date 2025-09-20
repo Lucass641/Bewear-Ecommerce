@@ -15,6 +15,7 @@ import { auth } from "@/lib/auth";
 export const finishOrder = async (
   clearCartAfterOrder: boolean = true,
   cartId?: string,
+  shippingPriceInCents: number = 0,
 ) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -82,7 +83,8 @@ export const finishOrder = async (
         state: cart.shippingAddress.state,
         street: cart.shippingAddress.street,
         userId: session.user.id,
-        totalPriceInCents,
+        totalPriceInCents: totalPriceInCents + shippingPriceInCents,
+        shippingPriceInCents,
         shippingAddressId: cart.shippingAddress!.id,
       })
       .returning();

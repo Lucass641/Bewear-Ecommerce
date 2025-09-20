@@ -13,11 +13,17 @@ export const useFinishOrder = () => {
     mutationFn: async ({
       clearCartAfterOrder = true,
       cartId,
+      shippingPriceInCents = 0,
     }: {
       clearCartAfterOrder?: boolean;
       cartId?: string;
+      shippingPriceInCents?: number;
     } = {}) => {
-      return await finishOrder(clearCartAfterOrder, cartId);
+      return await finishOrder(
+        clearCartAfterOrder,
+        cartId,
+        shippingPriceInCents,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: getUseCartQueryKey() });

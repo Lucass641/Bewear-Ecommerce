@@ -148,7 +148,10 @@ const CartConfirmationWrapper = ({}: CartConfirmationWrapperProps) => {
               </CardContent>
 
               <CardContent className="pt-2">
-                <FinishOrderButton disabled={!selectedShipping} />
+                <FinishOrderButton
+                  disabled={!selectedShipping}
+                  shippingPriceInCents={shippingInCents}
+                />
               </CardContent>
             </Card>
           </div>

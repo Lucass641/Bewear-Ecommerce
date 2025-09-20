@@ -10,9 +10,13 @@ import { useFinishOrder } from "@/hooks/mutations/use-finish-order";
 
 interface FinishOrderButtonProps {
   disabled?: boolean;
+  shippingPriceInCents?: number;
 }
 
-const FinishOrderButton = ({ disabled = false }: FinishOrderButtonProps) => {
+const FinishOrderButton = ({
+  disabled = false,
+  shippingPriceInCents = 0,
+}: FinishOrderButtonProps) => {
   const [isBuyNow, setIsBuyNow] = useState(false);
   const [temporaryCartId, setTemporaryCartId] = useState<string | null>(null);
   const finishOrderMutation = useFinishOrder();
@@ -40,6 +44,7 @@ const FinishOrderButton = ({ disabled = false }: FinishOrderButtonProps) => {
       const { orderId } = await finishOrderMutation.mutateAsync({
         clearCartAfterOrder,
         cartId: cartIdToUse,
+        shippingPriceInCents,
       });
 
       const checkoutSession = await createCheckoutSession({
