@@ -70,7 +70,7 @@ export const Header = () => {
       {/* Mobile Header */}
       <div className="flex items-center justify-between p-5 md:hidden">
         <Link href="/">
-          <Image src="/logo.svg" alt="BEWEAR" width={100} height={26.14} />
+          <Image src="/Logo.svg" alt="BEWEAR" width={100} height={26.14} />
         </Link>
 
         <div className="flex items-center gap-2">
@@ -313,7 +313,7 @@ export const Header = () => {
             href="/"
             className="absolute left-1/2 -translate-x-1/2 transform"
           >
-            <Image src="/logo.svg" alt="BEWEAR" width={120} height={31.37} />
+            <Image src="/Logo.svg" alt="BEWEAR" width={120} height={31.37} />
           </Link>
 
           <div className="flex items-center gap-4">
@@ -329,7 +329,7 @@ export const Header = () => {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="text-muted-foreground text-base font-semibold transition-colors hover:text-primary"
+                className="text-muted-foreground hover:text-primary text-base font-semibold transition-colors"
               >
                 {category.name}
               </Link>
