@@ -79,15 +79,15 @@ const SignInForm = () => {
 
   return (
     <>
-      <Card className="w-full">
-        <CardHeader>
+      <Card className="w-full border-0 shadow-none lg:border lg:shadow-sm">
+        <CardHeader className="px-0 pb-1 lg:px-6">
           <CardTitle>Entrar</CardTitle>
           <CardDescription>Faça login para continuar.</CardDescription>
         </CardHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <CardContent className="grid w-full gap-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
+            <CardContent className="grid w-full gap-2 px-0 py-0 lg:px-6">
               <FormField
                 control={form.control}
                 name="email"
@@ -119,7 +119,7 @@ const SignInForm = () => {
                 )}
               />
             </CardContent>
-            <CardFooter className="flex flex-col gap-2">
+            <CardFooter className="flex flex-col gap-2 px-0 pt-1 lg:px-6">
               <Button
                 type="submit"
                 className="w-full"

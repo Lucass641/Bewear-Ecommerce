@@ -34,8 +34,6 @@ export const useBuyNow = () => {
       });
       return result;
     },
-    onSuccess: () => {
-      // Não invalidar o carrinho principal quando criar carrinho temporário
-    },
+    onSuccess: () => {},
   });
 };

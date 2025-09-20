@@ -17,10 +17,6 @@ const IdentificationPage = async () => {
     redirect("/");
   }
 
-  // Verificar se há um carrinho temporário no localStorage (client-side)
-  // Como esta é uma server component, vamos buscar o carrinho principal primeiro
-  // e deixar o client-side lidar com a lógica do carrinho temporário
-
   const cart = await db.query.cartTable.findFirst({
     where: (cart, { eq, and }) =>
       and(eq(cart.userId, session.user.id), eq(cart.isTemporary, false)),

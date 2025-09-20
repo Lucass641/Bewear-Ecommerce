@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { orderTable } from "@/db/schema";
 import { formatCentsToBRL } from "@/helpers/money";
 
+import EmptyOrdersState from "./empty-orders-state";
+
 interface OrdersProps {
   orders: Array<{
     id: string;
@@ -81,6 +83,17 @@ const Orders = ({ orders }: OrdersProps) => {
       statusMap[status as keyof typeof statusMap] || statusMap.pending;
     return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
   };
+
+  if (orders.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="mb-8">
+          <h1 className="text-lg font-semibold md:text-xl">Meus pedidos</h1>
+        </div>
+        <EmptyOrdersState />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -76,14 +76,14 @@ const SignUpForm = () => {
   }
   return (
     <>
-      <Card className="w-full">
-        <CardHeader>
+      <Card className="w-full border-0 shadow-none lg:border lg:shadow-sm">
+        <CardHeader className="px-0 pb-1 lg:px-6">
           <CardTitle>Criar conta</CardTitle>
           <CardDescription>Crie uma conta para continuar.</CardDescription>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <CardContent className="grid w-full gap-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-1">
+            <CardContent className="grid w-full gap-1.5 px-0 py-0 lg:px-6">
               <FormField
                 control={form.control}
                 name="name"
@@ -145,7 +145,7 @@ const SignUpForm = () => {
                 )}
               />
             </CardContent>
-            <CardFooter>
+            <CardFooter className="px-0 pt-1 lg:px-6">
               <Button
                 type="submit"
                 className="w-full"
