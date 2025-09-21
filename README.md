@@ -278,7 +278,7 @@ O projeto estará disponível em `http://localhost:3000`
 
 ## 👨‍💻 Desenvolvedor
 
-Desenvolvido com ❤️ por Lucas Grangeiro.
+Desenvolvido por Lucas Grangeiro.
 
 ---
 
