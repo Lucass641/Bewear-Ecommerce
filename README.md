@@ -275,13 +275,9 @@ O projeto estará disponível em `http://localhost:3000`
 4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
 
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
 ## 👨‍💻 Desenvolvedor
 
-Desenvolvido com ❤️ por [Seu Nome]
+Desenvolvido por Lucas Grangeiro.
 
 ---
 
