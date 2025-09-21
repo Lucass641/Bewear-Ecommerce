@@ -3,6 +3,7 @@ import {
   FilterOption,
   getCategoryType,
 } from "../types/filters";
+import { searchMatch } from "@/utils/search";
 
 export interface ProductWithVariants {
   id: string;
@@ -23,6 +24,25 @@ export interface ProductWithVariants {
   }>;
 }
 
+export interface ProductVariantWithProduct {
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
+  priceInCents: number;
+  imageUrl: string;
+  productId: string;
+  createdAt: Date;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    categoryId: string;
+    createdAt: Date;
+  };
+}
+
 export function getUniqueColors(
   products: ProductWithVariants[],
 ): FilterOption[] {
@@ -33,6 +53,25 @@ export function getUniqueColors(
       const currentCount = colorCounts.get(variant.color) || 0;
       colorCounts.set(variant.color, currentCount + 1);
     });
+  });
+
+  return Array.from(colorCounts.entries())
+    .map(([color, count]) => ({
+      value: color,
+      label: color,
+      count,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getUniqueColorsFromVariants(
+  productVariants: ProductVariantWithProduct[],
+): FilterOption[] {
+  const colorCounts = new Map<string, number>();
+
+  productVariants.forEach((variant) => {
+    const currentCount = colorCounts.get(variant.color) || 0;
+    colorCounts.set(variant.color, currentCount + 1);
   });
 
   return Array.from(colorCounts.entries())
@@ -77,14 +116,13 @@ export function filterProducts(
 ): ProductWithVariants[] {
   return products.filter((product) => {
     if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
       const matchesSearch =
-        product.name.toLowerCase().includes(searchTerm) ||
-        product.description.toLowerCase().includes(searchTerm) ||
+        searchMatch(filters.search, product.name) ||
+        searchMatch(filters.search, product.description) ||
         product.variants.some(
           (variant) =>
-            variant.name.toLowerCase().includes(searchTerm) ||
-            variant.color.toLowerCase().includes(searchTerm),
+            searchMatch(filters.search, variant.name) ||
+            searchMatch(filters.search, variant.color),
         );
 
       if (!matchesSearch) return false;
@@ -121,6 +159,47 @@ export function sortProducts(
         const maxPriceB = Math.max(...b.variants.map((v) => v.priceInCents));
         return maxPriceB - maxPriceA;
       });
+
+    default:
+      return sorted;
+  }
+}
+
+export function filterProductVariants(
+  productVariants: ProductVariantWithProduct[],
+  filters: CategoryFilters,
+): ProductVariantWithProduct[] {
+  return productVariants.filter((variant) => {
+    if (filters.search) {
+      const matchesSearch =
+        searchMatch(filters.search, variant.product.name) ||
+        searchMatch(filters.search, variant.product.description) ||
+        searchMatch(filters.search, variant.name) ||
+        searchMatch(filters.search, variant.color);
+
+      if (!matchesSearch) return false;
+    }
+
+    if (filters.colors.length > 0) {
+      if (!filters.colors.includes(variant.color)) return false;
+    }
+
+    return true;
+  });
+}
+
+export function sortProductVariants(
+  productVariants: ProductVariantWithProduct[],
+  sortBy: CategoryFilters["sortBy"],
+): ProductVariantWithProduct[] {
+  const sorted = [...productVariants];
+
+  switch (sortBy) {
+    case "price-asc":
+      return sorted.sort((a, b) => a.priceInCents - b.priceInCents);
+
+    case "price-desc":
+      return sorted.sort((a, b) => b.priceInCents - a.priceInCents);
 
     default:
       return sorted;

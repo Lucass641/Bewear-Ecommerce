@@ -35,7 +35,7 @@ export const Cart = () => {
         <Button variant="ghost" size="icon" className="relative">
           <ShoppingBag className="size-6 md:size-7" />
           {totalItems > 0 && (
-            <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold">
+            <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold">
               {totalItems}
             </span>
           )}

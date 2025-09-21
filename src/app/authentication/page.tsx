@@ -9,7 +9,7 @@ export default function Authentication() {
       <div className="flex min-h-[600px] lg:gap-8 xl:gap-12">
         <div className="hidden flex-col items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 p-8 text-white lg:flex lg:w-1/2">
           <div className="max-w-md space-y-4 text-center">
-            <h1 className="text-3xl font-bold">Bem-vindo à Bewear</h1>
+            <h1 className="text-3xl font-semibold">Bem-vindo à Bewear</h1>
             <p className="text-lg text-purple-100">
               Descubra as melhores peças de roupa com estilo e qualidade únicos.
             </p>

@@ -8,6 +8,7 @@ import { productTable, productVariantTable } from "@/db/schema";
 import { formatCentsToBRL } from "@/helpers/money";
 
 import ProductActions from "./components/product-actions";
+import VariantSelector from "./components/variant-selector";
 
 interface ProductVariantPageProps {
   params: Promise<{ slug: string }>;
@@ -52,16 +53,26 @@ const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
 
         <div className="flex flex-col space-y-6 py-6 lg:w-1/2 lg:py-0">
           <div className="space-y-2">
-            <h1 className="text-xl font-bold lg:text-2xl">
+            <h1 className="text-xl font-semibold lg:text-2xl">
               {productVariant.product.name}
             </h1>
             <h2 className="text-muted-foreground text-sm lg:text-base">
               {productVariant.name}
             </h2>
-            <p className="text-xl font-bold lg:text-2xl">
+            <p className="text-xl font-semibold lg:text-2xl">
               {formatCentsToBRL(productVariant.priceInCents)}
             </p>
           </div>
+
+          {productVariant.product.variants.length > 1 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium">Cores disponíveis:</h3>
+              <VariantSelector
+                selectedVariantSlug={productVariant.slug}
+                variants={productVariant.product.variants}
+              />
+            </div>
+          )}
 
           <ProductActions
             productVariantId={productVariant.id}

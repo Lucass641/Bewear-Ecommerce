@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
 import { db } from "@/db";
-import { categoryTable, productTable } from "@/db/schema";
+import { categoryTable, productTable, productVariantTable } from "@/db/schema";
 
 import CategoryPageClient from "./components/category-page-client";
 
@@ -18,14 +18,32 @@ const CategoryPage = async ({ params }: CategoryPageProps) => {
   if (!category) {
     return notFound();
   }
-  const products = await db.query.productTable.findMany({
-    where: eq(productTable.categoryId, category.id),
-    with: {
-      variants: true,
-    },
-  });
+  const productVariants = await db
+    .select({
+      id: productVariantTable.id,
+      name: productVariantTable.name,
+      slug: productVariantTable.slug,
+      color: productVariantTable.color,
+      priceInCents: productVariantTable.priceInCents,
+      imageUrl: productVariantTable.imageUrl,
+      productId: productVariantTable.productId,
+      createdAt: productVariantTable.createdAt,
+      product: {
+        id: productTable.id,
+        name: productTable.name,
+        slug: productTable.slug,
+        description: productTable.description,
+        categoryId: productTable.categoryId,
+        createdAt: productTable.createdAt,
+      },
+    })
+    .from(productVariantTable)
+    .innerJoin(productTable, eq(productVariantTable.productId, productTable.id))
+    .where(eq(productTable.categoryId, category.id));
 
-  return <CategoryPageClient category={category} products={products} />;
+  return (
+    <CategoryPageClient category={category} productVariants={productVariants} />
+  );
 };
 
 export default CategoryPage;
