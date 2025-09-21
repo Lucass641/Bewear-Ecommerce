@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { productTable, productVariantTable } from "@/db/schema";
 
-import ProductItem from "./product-item";
+import ProductVariantItem from "./product-variant-item";
 
 interface ProductListProps {
   title: string;
@@ -18,6 +18,20 @@ const ProductList = ({ title, products }: ProductListProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const allVariants = products.flatMap((product) =>
+    product.variants.map((variant) => ({
+      ...variant,
+      product: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        categoryId: product.categoryId,
+        createdAt: product.createdAt,
+      },
+    })),
+  );
 
   const checkScrollButtons = () => {
     if (scrollContainerRef.current) {
@@ -58,7 +72,7 @@ const ProductList = ({ title, products }: ProductListProps) => {
       }
       window.removeEventListener("resize", handleResize);
     };
-  }, [products]);
+  }, [allVariants]);
 
   return (
     <div className="space-y-6">
@@ -71,12 +85,12 @@ const ProductList = ({ title, products }: ProductListProps) => {
           ref={scrollContainerRef}
           className="flex gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] md:gap-6 [&::-webkit-scrollbar]:hidden"
         >
-          {products.map((product) => (
+          {allVariants.map((variant) => (
             <div
-              key={product.id}
+              key={variant.id}
               className="w-[150px] flex-shrink-0 md:w-[200px] xl:w-[300px] 2xl:w-[300px]"
             >
-              <ProductItem product={product} />
+              <ProductVariantItem variant={variant} />
             </div>
           ))}
         </div>
