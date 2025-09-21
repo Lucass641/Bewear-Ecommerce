@@ -1,13 +1,15 @@
-
 import Image from "next/image";
 
+import CategoryGrid from "@/components/common/category-grid";
 import ProductList from "@/components/common/product-list";
+import { getAllCategories } from "@/data/categories/get";
 import { getNewlyCreatedProducts, getProducts } from "@/data/products/get";
 
 const Home = async () => {
-  const [products, newlyCreatedProduct] = await Promise.all([
+  const [products, newlyCreatedProduct, categories] = await Promise.all([
     getProducts(),
     getNewlyCreatedProducts(),
+    getAllCategories(),
   ]);
 
   return (
@@ -47,6 +49,9 @@ const Home = async () => {
 
       <div>
         <ProductList products={products} title="Mais vendidos" />
+      </div>
+      <div className="md:hidden">
+        <CategoryGrid categories={categories} />
       </div>
 
       {/* Additional banners section */}

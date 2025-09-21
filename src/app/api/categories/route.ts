@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { db } from "@/db";
+import { getAllCategories } from "@/data/categories/get";
 
 export async function GET() {
   try {
-    const categories = await db.query.categoryTable.findMany({});
+    const categories = await getAllCategories();
     return NextResponse.json(categories);
   } catch (error) {
     console.error("Erro ao buscar categorias:", error);
