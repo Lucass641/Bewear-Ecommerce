@@ -3,6 +3,7 @@
 import { loadStripe } from "@stripe/stripe-js";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { createCheckoutSession } from "@/actions/create-checkout-session";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ const FinishOrderButton = ({
   const handleFinishOrder = async () => {
     try {
       if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-        throw new Error("Stripe publishable key is not set");
+        throw new Error("Erro de configuração do Stripe");
       }
 
       const clearCartAfterOrder = !isBuyNow;
@@ -56,14 +57,22 @@ const FinishOrderButton = ({
       );
 
       if (!stripe) {
-        throw new Error("Failed to load Stripe");
+        throw new Error("Falha ao carregar sistema de pagamento");
       }
 
-      await stripe.redirectToCheckout({
+      const { error } = await stripe.redirectToCheckout({
         sessionId: checkoutSession.id,
       });
+
+      if (error) {
+        throw new Error("Erro ao redirecionar para pagamento");
+      }
     } catch (error) {
-      throw error;
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Erro ao processar pagamento. Tente novamente.",
+      );
     }
   };
 

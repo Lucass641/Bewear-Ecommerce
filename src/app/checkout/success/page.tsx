@@ -37,7 +37,9 @@ const CheckoutSuccessPage = () => {
         <DialogFooter>
           <div className="flex w-full flex-col items-center justify-center gap-2">
             <Button className="w-full rounded-full" size="lg" asChild>
-              <Link href="/my-orders">Ver meus pedidos</Link>
+              <Link href="/my-orders?from=payment-success">
+                Ver meus pedidos
+              </Link>
             </Button>
             <Button
               className="w-full rounded-full"

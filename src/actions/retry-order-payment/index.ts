@@ -8,14 +8,9 @@ import { db } from "@/db";
 import { orderItemTable, orderTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
-import {
-  CreateCheckoutSessionSchema,
-  createCheckoutSessionSchema,
-} from "./schema";
+import { RetryOrderPaymentSchema, retryOrderPaymentSchema } from "./schema";
 
-export const createCheckoutSession = async (
-  data: CreateCheckoutSessionSchema,
-) => {
+export const retryOrderPayment = async (data: RetryOrderPaymentSchema) => {
   if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error("Stripe secret key is not set");
   }
@@ -25,7 +20,7 @@ export const createCheckoutSession = async (
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
-  const { orderId } = createCheckoutSessionSchema.parse(data);
+  const { orderId } = retryOrderPaymentSchema.parse(data);
   const order = await db.query.orderTable.findFirst({
     where: eq(orderTable.id, orderId),
   });
@@ -34,6 +29,9 @@ export const createCheckoutSession = async (
   }
   if (order.userId !== session.user.id) {
     throw new Error("Unauthorized");
+  }
+  if (order.status !== "pending") {
+    throw new Error("Order is not pending");
   }
   const orderItems = await db.query.orderItemTable.findMany({
     where: eq(orderItemTable.orderId, orderId),

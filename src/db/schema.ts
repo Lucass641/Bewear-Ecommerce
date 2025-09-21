@@ -259,6 +259,7 @@ export const orderTable = pgTable("order", {
   totalPriceInCents: integer("total_price_in_cents").notNull(),
   shippingPriceInCents: integer("shipping_price_in_cents").notNull().default(0),
   status: orderStatus().notNull().default("pending"),
+  stripeSessionId: text("stripe_session_id"),
   trackingCode: text("tracking_code"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

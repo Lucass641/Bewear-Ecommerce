@@ -56,6 +56,28 @@ const Addresses = ({
     await updateCartShippingAddressMutation.mutateAsync(updateData);
   };
 
+  const handleAddressSelection = async (addressId: string) => {
+    setSelectedAddress(addressId);
+
+    const buyNowFlag = localStorage.getItem("buyNow");
+    const tempCartId = localStorage.getItem("temporaryCartId");
+
+    const updateData: UpdateCartShippingAddressSchema = {
+      shippingAddressId: addressId,
+    };
+
+    if (buyNowFlag === "true" && tempCartId) {
+      updateData.cartId = tempCartId;
+    }
+
+    try {
+      await updateCartShippingAddressMutation.mutateAsync(updateData);
+    } catch (error) {
+      toast.error("Erro ao selecionar endereço. Tente novamente.");
+      console.error(error);
+    }
+  };
+
   const handleDeleteAddress = async (addressId: string) => {
     try {
       await deleteShippingAddressMutation.mutateAsync(addressId);
@@ -70,29 +92,12 @@ const Addresses = ({
     }
   };
 
-  const handleConfirmOrder = async () => {
+  const handleContinueToConfirmation = () => {
     if (!selectedAddress) return;
-
-    try {
-      const buyNowFlag = localStorage.getItem("buyNow");
-      const tempCartId = localStorage.getItem("temporaryCartId");
-
-      const updateData: UpdateCartShippingAddressSchema = {
-        shippingAddressId: selectedAddress,
-      };
-
-      if (buyNowFlag === "true" && tempCartId) {
-        updateData.cartId = tempCartId;
-      }
-      await updateCartShippingAddressMutation.mutateAsync(updateData);
-      router.push("/cart/confirmation");
-    } catch (error) {
-      toast.error("Erro ao selecionar endereço. Tente novamente.");
-      console.error(error);
-    }
+    router.push("/cart/confirmation");
   };
 
-  const isConfirmOrderLoading = updateCartShippingAddressMutation.isPending;
+  const isUpdatingAddress = updateCartShippingAddressMutation.isPending;
 
   return (
     <>
@@ -110,8 +115,8 @@ const Addresses = ({
             </div>
           ) : (
             <RadioGroup
-              value={selectedAddress}
-              onValueChange={setSelectedAddress}
+              value={selectedAddress || ""}
+              onValueChange={handleAddressSelection}
             >
               {addresses?.length === 0 && (
                 <div className="py-4 text-center">
@@ -183,15 +188,15 @@ const Addresses = ({
           {selectedAddress && (
             <div className="mt-6">
               <Button
-                onClick={handleConfirmOrder}
+                onClick={handleContinueToConfirmation}
                 className="w-full rounded-full"
-                disabled={isConfirmOrderLoading}
+                disabled={isUpdatingAddress}
                 size="lg"
               >
-                {isConfirmOrderLoading && (
+                {isUpdatingAddress && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {isConfirmOrderLoading ? "Processando..." : "Confirmar pedido"}
+                {isUpdatingAddress ? "Atualizando endereço..." : "Continuar"}
               </Button>
             </div>
           )}

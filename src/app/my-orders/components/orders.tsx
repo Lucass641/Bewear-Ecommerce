@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { orderTable } from "@/db/schema";
 import { formatCentsToBRL } from "@/helpers/money";
 
-import EmptyOrdersState from "./empty-orders-state";
+import RetryPaymentButton from "./retry-payment-button";
 
 interface OrdersProps {
   orders: Array<{
@@ -84,17 +84,6 @@ const Orders = ({ orders }: OrdersProps) => {
       statusMap[status as keyof typeof statusMap] || statusMap.pending;
     return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
   };
-
-  if (orders.length === 0) {
-    return (
-      <div className="space-y-6">
-        <div className="mb-8">
-          <h1 className="text-lg font-semibold md:text-xl">Meus pedidos</h1>
-        </div>
-        <EmptyOrdersState />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -234,11 +223,11 @@ const Orders = ({ orders }: OrdersProps) => {
 
                   {/* Order Summary */}
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm lg:hidden">
                       <span>Método de Pagamento</span>
                       <span>Cartão</span>
                     </div>
-                    <Separator />
+                    <Separator className="lg:hidden" />
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
                       <span>
@@ -263,6 +252,16 @@ const Orders = ({ orders }: OrdersProps) => {
                       </span>
                     </div>
                   </div>
+
+                  {/* Retry Payment Button for Pending Orders */}
+                  {order.status === "pending" && (
+                    <div className="pt-4">
+                      <Separator className="mb-4" />
+                      <div className="flex justify-end">
+                        <RetryPaymentButton orderId={order.id} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             )}

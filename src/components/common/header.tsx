@@ -38,7 +38,6 @@ interface Category {
   name: string;
   slug: string;
 }
-
 export const Header = () => {
   const { data: session } = authClient.useSession();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -163,7 +162,7 @@ export const Header = () => {
                   </div>
 
                   <div className="space-y-6 px-5">
-                    <h3 className="text-muted-foreground mb-5 font-semibold tracking-wider uppercase">
+                    <h3 className="text-muted-foreground mb-5 font-semibold uppercase tracking-wider">
                       Categorias
                     </h3>
                     <div className="grid grid-cols-1 gap-3">
@@ -246,7 +245,7 @@ export const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
 
-                  <div className="absolute right-0 -bottom-6 left-0 h-8 bg-transparent" />
+                  <div className="absolute -bottom-6 left-0 right-0 h-8 bg-transparent" />
 
                   <DropdownMenuContent
                     align="start"
@@ -256,7 +255,7 @@ export const Header = () => {
                     onMouseLeave={() => setIsDropdownOpen(false)}
                   >
                     {/* Gota */}
-                    <div className="absolute -top-2 left-8 h-4 w-4 rotate-45 border-t border-l border-gray-200 bg-white/80 backdrop-blur-md" />
+                    <div className="absolute -top-2 left-8 h-4 w-4 rotate-45 border-l border-t border-gray-200 bg-white/80 backdrop-blur-md" />
 
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link

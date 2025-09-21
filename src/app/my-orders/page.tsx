@@ -1,56 +1,21 @@
-import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { db } from "@/db";
-import { orderTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
-import Orders from "./components/orders";
+import OrdersWrapper from "./components/orders-wrapper";
 
 const MyOrdersPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session?.user.id) {
-    redirect("/login");
+    redirect("/authentication");
   }
-  const orders = await db.query.orderTable.findMany({
-    where: eq(orderTable.userId, session?.user.id),
-    with: {
-      items: {
-        with: {
-          productVariant: {
-            with: {
-              product: true,
-            },
-          },
-        },
-      },
-    },
-  });
 
   return (
     <div className="mx-auto max-w-7xl px-5">
-      <Orders
-        orders={orders.map((order) => ({
-          id: order.id,
-          totalPriceInCents: order.totalPriceInCents,
-          shippingPriceInCents: order.shippingPriceInCents,
-          status: order.status,
-          trackingCode: order.trackingCode,
-          createdAt: order.createdAt,
-          items: order.items.map((item) => ({
-            id: item.id,
-            imageUrl: item.productVariant.imageUrl,
-            productName: item.productVariant.product.name,
-            productVariantName: item.productVariant.name,
-            priceInCents: item.priceInCents,
-            quantity: item.quantity,
-            size: item.size,
-          })),
-        }))}
-      />
+      <OrdersWrapper />
     </div>
   );
 };

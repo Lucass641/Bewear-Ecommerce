@@ -7,6 +7,7 @@ import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import { TemporaryCartCleanup } from "@/components/common/temporary-cart-cleanup";
 import { Toaster } from "@/components/ui/sonner";
+import AuthProvider from "@/providers/auth-provider";
 import ReactQueryProvider from "@/providers/react-query";
 
 const geistSans = Geist({
@@ -35,13 +36,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
         suppressHydrationWarning
       >
-        <ReactQueryProvider>
-          <Header />
-          <div className="flex-1">
-            <TemporaryCartCleanup />
-            {children}
-          </div>
-        </ReactQueryProvider>
+        <AuthProvider>
+          <ReactQueryProvider>
+            <Header />
+            <div className="flex-1">
+              <TemporaryCartCleanup />
+              {children}
+            </div>
+          </ReactQueryProvider>
+        </AuthProvider>
         <Toaster position="top-center" />
         <Footer />
       </body>
