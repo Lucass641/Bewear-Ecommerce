@@ -1,9 +1,10 @@
+import { searchMatch } from "@/utils/search";
+
 import {
   CategoryFilters,
   FilterOption,
   getCategoryType,
 } from "../types/filters";
-import { searchMatch } from "@/utils/search";
 
 export interface ProductWithVariants {
   id: string;

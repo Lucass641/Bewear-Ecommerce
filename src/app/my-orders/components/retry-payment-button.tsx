@@ -19,7 +19,7 @@ const RetryPaymentButton = ({ orderId }: RetryPaymentButtonProps) => {
       if (session.url) {
         window.location.href = session.url;
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro ao tentar pagamento novamente");
     }
   };

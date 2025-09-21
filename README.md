@@ -196,16 +196,21 @@ DATABASE_URL="postgresql://..."
 
 # BetterAuth
 BETTER_AUTH_SECRET="seu-secret-aqui"
-BETTER_AUTH_URL="http://localhost:3000"
 
 # Google OAuth
 GOOGLE_CLIENT_ID="seu-google-client-id"
 GOOGLE_CLIENT_SECRET="seu-google-client-secret"
 
 # Stripe
-STRIPE_PUBLIC_KEY="pk_test_..."
 STRIPE_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Public Url
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+#Melhor Envio
+MELHOR_ENVIO_TOKEN="seu-token-melhor-envio"
 ```
 
 4. **Execute as migrações do banco**
@@ -270,13 +275,10 @@ O projeto estará disponível em `http://localhost:3000`
 4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
 
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ## 👨‍💻 Desenvolvedor
 
-Desenvolvido com ❤️ por [Seu Nome]
+Desenvolvido com ❤️ por Lucas Grangeiro.
 
 ---
 
